@@ -1,0 +1,15 @@
+01 Aug 2020 | 11:53:31,551 | INFO  | quick-rpc-client-default | client.handler.EzyConnectionFailureHandler |     | connection failure, reason: CONNECTION_REFUSED
+01 Aug 2020 | 11:53:31,555 | INFO  | quick-rpc-client-default | client.socket.EzyTcpSocketClient |     | try reconnect to server: 1, wating time: 3000
+01 Aug 2020 | 11:53:31,560 | WARN  | quick-rpc-client-default | client.handler.EzyEventHandlers |     | has no handler for event type: TRY_CONNECT
+01 Aug 2020 | 11:53:34,559 | INFO  | quick-rpc-client-default | client.handler.EzyConnectionFailureHandler |     | connection failure, reason: CONNECTION_REFUSED
+01 Aug 2020 | 11:53:34,560 | INFO  | quick-rpc-client-default | client.socket.EzyTcpSocketClient |     | try reconnect to server: 2, wating time: 3000
+01 Aug 2020 | 11:53:34,564 | WARN  | quick-rpc-client-default | client.handler.EzyEventHandlers |     | has no handler for event type: TRY_CONNECT
+01 Aug 2020 | 11:53:37,565 | INFO  | quick-rpc-client-default | client.handler.EzyConnectionFailureHandler |     | connection failure, reason: CONNECTION_REFUSED
+01 Aug 2020 | 11:53:37,566 | INFO  | quick-rpc-client-default | client.socket.EzyTcpSocketClient |     | try reconnect to server: 3, wating time: 3000
+01 Aug 2020 | 11:53:37,570 | WARN  | quick-rpc-client-default | client.handler.EzyEventHandlers |     | has no handler for event type: TRY_CONNECT
+01 Aug 2020 | 11:53:40,569 | INFO  | quick-rpc-client-default | client.handler.EzyConnectionFailureHandler |     | connection failure, reason: CONNECTION_REFUSED
+01 Aug 2020 | 11:53:40,570 | INFO  | quick-rpc-client-default | client.socket.EzyTcpSocketClient |     | try reconnect to server: 4, wating time: 3000
+01 Aug 2020 | 11:53:40,574 | WARN  | quick-rpc-client-default | client.handler.EzyEventHandlers |     | has no handler for event type: TRY_CONNECT
+01 Aug 2020 | 11:58:10,532 | INFO  | quick-rpc-client-default | client.handler.EzyConnectionFailureHandler |     | connection failure, reason: CONNECTION_REFUSED
+01 Aug 2020 | 11:58:10,534 | INFO  | quick-rpc-client-default | client.socket.EzyTcpSocketClient |     | try reconnect to server: 1, wating time: 3000
+01 Aug 2020 | 11:58:10,539 | WARN  | quick-rpc-client-default | client.handler.EzyEventHandlers |     | has no handler for event type: TRY_CONNECT

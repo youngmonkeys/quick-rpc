@@ -1,4 +1,4 @@
-package com.tvd12.quick.rpc;
+package com.tvd12.quick.rpc.client;
 
 public interface RpcCallback {
 
