@@ -14,7 +14,9 @@ import com.tvd12.ezyfoxserver.setting.EzySettingsBuilder;
 import com.tvd12.ezyfoxserver.setting.EzySimpleAdminSetting;
 import com.tvd12.ezyfoxserver.setting.EzySimpleAppSetting;
 import com.tvd12.ezyfoxserver.setting.EzySimplePluginSetting;
+import com.tvd12.ezyfoxserver.setting.EzySimpleUserManagementSetting;
 import com.tvd12.ezyfoxserver.setting.EzySimpleZoneSetting;
+import com.tvd12.ezyfoxserver.setting.EzyUserManagementSettingBuilder;
 import com.tvd12.ezyfoxserver.setting.EzyZoneSettingBuilder;
 import com.tvd12.quick.rpc.server.setting.QuickRpcSettings;
 import com.tvd12.quick.rpc.server.transport.RpcAppEntryLoader;
@@ -45,10 +47,14 @@ public class QuickRpcServer
 				.name("rpc")
 				.entryLoader(RpcAppEntryLoader.class)
 				.build();
+		EzySimpleUserManagementSetting userManagementSetting = new EzyUserManagementSettingBuilder()
+				.maxSessionPerUser(Integer.MAX_VALUE)
+				.build();
 		EzySimpleZoneSetting zoneSetting = new EzyZoneSettingBuilder()
 				.name("rpc")
 				.plugin(pluginSetting)
 				.application(appSetting)
+				.userManagement(userManagementSetting)
 				.build();
 		EzySettings settings = new EzySettingsBuilder()
 				.nodeName("rpc")

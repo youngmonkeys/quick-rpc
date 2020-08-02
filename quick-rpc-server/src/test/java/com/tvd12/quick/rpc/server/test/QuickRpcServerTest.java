@@ -12,7 +12,6 @@ public class QuickRpcServerTest {
 				.build();
 		QuickRpcServer server = new QuickRpcServer(settings);
 		server.start();
-		server.stop();
 	}
 	
 }
