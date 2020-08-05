@@ -1,10 +1,19 @@
-02 Aug 2020 | 23:20:40,689 | WARN  | qkrpc-client-default-socket-loop | client.handler.EzyAppResponseHandler |     | app: rpc has no handler for command: $cf
-02 Aug 2020 | 23:20:54,024 | INFO  | qkrpc-client-default-socket-loop | client.handler.EzyDisconnectionHandler |     | handle disconnection, reason: UNKNOWN
-02 Aug 2020 | 23:20:54,025 | INFO  | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | try reconnect to server: 1, wating time: 3000
-02 Aug 2020 | 23:20:54,029 | WARN  | qkrpc-client-default-socket-loop | client.handler.EzyEventHandlers |     | has no handler for event type: TRY_CONNECT
-02 Aug 2020 | 23:20:57,041 | INFO  | qkrpc-client-default-socket-loop | client.handler.EzyConnectionFailureHandler |     | connection failure, reason: CONNECTION_REFUSED
-02 Aug 2020 | 23:20:57,041 | INFO  | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | try reconnect to server: 2, wating time: 3000
-02 Aug 2020 | 23:20:57,046 | WARN  | qkrpc-client-default-socket-loop | client.handler.EzyEventHandlers |     | has no handler for event type: TRY_CONNECT
-02 Aug 2020 | 23:21:00,047 | INFO  | qkrpc-client-default-socket-loop | client.handler.EzyConnectionFailureHandler |     | connection failure, reason: CONNECTION_REFUSED
-02 Aug 2020 | 23:21:00,048 | INFO  | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | try reconnect to server: 3, wating time: 3000
-02 Aug 2020 | 23:21:00,052 | WARN  | qkrpc-client-default-socket-loop | client.handler.EzyEventHandlers |     | has no handler for event type: TRY_CONNECT
+06 Aug 2020 | 00:01:07,583 | WARN  | ezyfox-socket-reader | client.socket.EzyTcpSocketReader |     | I/O error at socket-reader
+java.io.IOException: Connection reset by peer
+	at sun.nio.ch.FileDispatcherImpl.read0(Native Method)
+	at sun.nio.ch.SocketDispatcher.read(SocketDispatcher.java:39)
+	at sun.nio.ch.IOUtil.readIntoNativeBuffer(IOUtil.java:223)
+	at sun.nio.ch.IOUtil.read(IOUtil.java:192)
+	at sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:380)
+	at com.tvd12.ezyfoxserver.client.socket.EzyTcpSocketReader.readSocketData(EzyTcpSocketReader.java:16)
+	at com.tvd12.ezyfoxserver.client.socket.EzySocketReader.update(EzySocketReader.java:46)
+	at com.tvd12.ezyfoxserver.client.socket.EzySocketAdapter.loop(EzySocketAdapter.java:36)
+	at com.tvd12.ezyfoxserver.client.socket.EzySocketReader.loop(EzySocketReader.java:36)
+	at com.tvd12.ezyfoxserver.client.socket.EzySocketAdapter$1.run(EzySocketAdapter.java:25)
+	at java.lang.Thread.run(Thread.java:748)
+06 Aug 2020 | 00:01:07,608 | INFO  | qkrpc-client-default-socket-loop | client.handler.EzyDisconnectionHandler |     | handle disconnection, reason: UNKNOWN
+06 Aug 2020 | 00:01:07,611 | INFO  | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | try reconnect to server: 1, wating time: 3000
+06 Aug 2020 | 00:01:07,617 | WARN  | qkrpc-client-default-socket-loop | client.handler.EzyEventHandlers |     | has no handler for event type: TRY_CONNECT
+06 Aug 2020 | 00:01:22,988 | INFO  | qkrpc-client-default-socket-loop | client.handler.EzyDisconnectionHandler |     | handle disconnection, reason: UNKNOWN
+06 Aug 2020 | 00:01:22,991 | INFO  | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | try reconnect to server: 1, wating time: 3000
+06 Aug 2020 | 00:01:22,998 | WARN  | qkrpc-client-default-socket-loop | client.handler.EzyEventHandlers |     | has no handler for event type: TRY_CONNECT

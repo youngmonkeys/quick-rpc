@@ -13,6 +13,7 @@ import com.tvd12.ezyfox.concurrent.EzyFutureTask;
 import com.tvd12.ezyfox.concurrent.callback.EzyResultCallback;
 import com.tvd12.ezyfox.entity.EzyArray;
 import com.tvd12.ezyfox.entity.EzyData;
+import com.tvd12.ezyfox.factory.EzyEntityFactory;
 import com.tvd12.ezyfox.util.EzyCloseable;
 import com.tvd12.ezyfox.util.EzyLoggable;
 import com.tvd12.ezyfoxserver.client.EzyClient;
@@ -68,7 +69,9 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 	}
 
 	public void fire(RpcRequest request) {
-		transporterApp.send(request.getCommand(), (EzyData) request.getData());
+		EzyArray sdata = EzyEntityFactory.newArray();
+		sdata.add(request.getCommand(), request.getId(), request.getData());
+		transporterApp.send(sdata);
 	}
 	
 	public <T> T call(RpcRequest request, Class<T> returnType) throws Exception {

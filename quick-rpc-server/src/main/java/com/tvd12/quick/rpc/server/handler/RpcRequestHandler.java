@@ -1,10 +1,12 @@
 package com.tvd12.quick.rpc.server.handler;
 
-import com.tvd12.quick.rpc.server.RpcServerContext;
 import com.tvd12.quick.rpc.server.entity.RpcSession;
 
-public interface RpcRequestHandler<R> {
+public interface RpcRequestHandler<D> {
 
-	void handle(RpcServerContext context, RpcSession session, R request);
-	
+	void handle(RpcSession session, String requestId, D data);
+
+	default D newData() {
+		return null;
+	}
 }

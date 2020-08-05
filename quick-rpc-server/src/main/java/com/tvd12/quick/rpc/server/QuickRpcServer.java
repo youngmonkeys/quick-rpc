@@ -1,7 +1,9 @@
 package com.tvd12.quick.rpc.server;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.tvd12.ezyfox.util.EzyLoggable;
-import com.tvd12.ezyfox.util.EzyStartable;
 import com.tvd12.ezyfox.util.EzyStoppable;
 import com.tvd12.ezyfoxserver.config.EzyConfig;
 import com.tvd12.ezyfoxserver.config.EzyConfigBuilder;
@@ -18,23 +20,38 @@ import com.tvd12.ezyfoxserver.setting.EzySimpleUserManagementSetting;
 import com.tvd12.ezyfoxserver.setting.EzySimpleZoneSetting;
 import com.tvd12.ezyfoxserver.setting.EzyUserManagementSettingBuilder;
 import com.tvd12.ezyfoxserver.setting.EzyZoneSettingBuilder;
+import com.tvd12.quick.rpc.server.handler.RpcRequestHandler;
+import com.tvd12.quick.rpc.server.handler.RpcRequestHandlers;
+import com.tvd12.quick.rpc.server.manager.RpcComponentManager;
+import com.tvd12.quick.rpc.server.manager.RpcSessionManager;
 import com.tvd12.quick.rpc.server.setting.QuickRpcSettings;
 import com.tvd12.quick.rpc.server.transport.RpcAppEntryLoader;
 import com.tvd12.quick.rpc.server.transport.RpcPluginEntryLoader;
 
-public class QuickRpcServer 
-		extends EzyLoggable
-		implements EzyStartable, EzyStoppable {
+@SuppressWarnings("rawtypes")
+public class QuickRpcServer extends EzyLoggable implements EzyStoppable {
 
 	protected EzyEmbeddedServer transporter;
 	protected final QuickRpcSettings settings;
+	protected final Map<String, RpcRequestHandler> requestHandlers;
 	
 	public QuickRpcServer(QuickRpcSettings settings) {
 		this.settings = settings;
+		this.requestHandlers = new HashMap<>();
 	}
 	
-	@Override
-	public void start() throws Exception {
+	public RpcServerContext start() throws Exception {
+		RpcSessionManager sessionManager = new RpcSessionManager();
+		RpcRequestHandlers requestHandlers = RpcRequestHandlers.builder()
+				.addHandlers(this.requestHandlers)
+				.build();
+		RpcServerContext serverContext = RpcServerContext.builder()
+				.sessionManager(sessionManager)
+				.requestHandlers(requestHandlers)
+				.build();
+		RpcComponentManager componentManager = RpcComponentManager.getInstance();
+		componentManager.addComponent(RpcServerContext.class, serverContext);
+		
 		EzySimpleAdminSetting adminSetting = new EzyAdminSettingBuilder()
 				.username(settings.getUsername())
 				.password(settings.getPassword())
@@ -69,6 +86,7 @@ public class QuickRpcServer
 				.settings(settings)
 				.build();
 		transporter.start();
+		return serverContext;
 	}
 	
 	@Override
