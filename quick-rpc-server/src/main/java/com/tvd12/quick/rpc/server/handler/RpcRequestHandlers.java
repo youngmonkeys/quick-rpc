@@ -31,12 +31,15 @@ public class RpcRequestHandlers {
 		}
 		
 		public Builder addHandler(String cmd, RpcRequestHandler handler) {
-			handlers.put(cmd, handler);
+			handlers.put(cmd, new RpcRequestHandlerProxy(handler));
 			return this;
 		}
 		
 		public Builder addHandlers(Map<String, RpcRequestHandler> handlers) {
-			handlers.putAll(handlers);
+			for(String cmd : handlers.keySet()) {
+				RpcRequestHandler handler = handlers.get(cmd);
+				addHandler(cmd, handler);
+			}
 			return this;
 		}
 		

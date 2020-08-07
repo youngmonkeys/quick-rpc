@@ -18,6 +18,10 @@ public class RpcSessionManager {
 	public void addSession(RpcSession session) {
 		this.sessions.put(session.getKey(), session);
 	}
+	
+	public void removeSession(Object key) {
+		this.sessions.remove(key);
+	}
 
 	public RpcSession getSession(Object key) {
 		return sessions.get(key);
@@ -29,6 +33,10 @@ public class RpcSessionManager {
 	
 	public void getSessions(List<RpcSession> buffer) {
 		buffer.addAll(sessions.values());
+	}
+	
+	public int getSessionCount() {
+		return sessions.size();
 	}
 	
 }

@@ -40,16 +40,20 @@ public class QuickRpcServer extends EzyLoggable implements EzyStoppable {
 		this.requestHandlers = new HashMap<>();
 	}
 	
+	public QuickRpcServer addRequestHandler(String cmd, RpcRequestHandler handler) {
+		this.requestHandlers.put(cmd, handler);
+		return this;
+	}
+	
 	public RpcServerContext start() throws Exception {
 		RpcSessionManager sessionManager = new RpcSessionManager();
 		RpcRequestHandlers requestHandlers = RpcRequestHandlers.builder()
 				.addHandlers(this.requestHandlers)
 				.build();
-		RpcServerContext serverContext = RpcServerContext.builder()
-				.sessionManager(sessionManager)
-				.requestHandlers(requestHandlers)
-				.build();
 		RpcComponentManager componentManager = RpcComponentManager.getInstance();
+		componentManager.addComponent(RpcSessionManager.class, sessionManager);
+		componentManager.addComponent(RpcRequestHandlers.class, requestHandlers);
+		RpcServerContext serverContext = new RpcServerContext();
 		componentManager.addComponent(RpcServerContext.class, serverContext);
 		
 		EzySimpleAdminSetting adminSetting = new EzyAdminSettingBuilder()

@@ -1,5 +1,6 @@
 package com.tvd12.quick.rpc.client;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -50,6 +51,8 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 	protected EzyClient transporter;
 	protected EzyApp transporterApp;
 	protected final AtomicInteger remainRequest;
+	protected final Map<String, Class<?>> errorTypes;
+	protected final Map<String, Class<?>> responseTypes;
 	protected final Map<String, EzyFutureMap<String>> futureMap;
 
 	protected QuickRpcClient(Builder builder) {
@@ -66,33 +69,41 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 		this.transporterApp = transporter.getApp();
 		this.active = true;
 		this.remainRequest = new AtomicInteger();
+		this.errorTypes = new HashMap<>(builder.errorTypes);
+		this.responseTypes = new HashMap<>(builder.responseTypes);
 	}
 
 	public void fire(RpcRequest request) {
+		EzyArray commandData = EzyEntityFactory.newArray();
+		commandData.add(request.getCommand(), request.getId(), request.getData());
 		EzyArray sdata = EzyEntityFactory.newArray();
-		sdata.add(request.getCommand(), request.getId(), request.getData());
+		sdata.add("$r", commandData);
 		transporterApp.send(sdata);
 	}
 	
-	public <T> T call(RpcRequest request, Class<T> returnType) throws Exception {
+	public <T> T call(RpcRequest request) throws Exception {
+		return call(request, -1);
+	}
+	
+	public <T> T call(RpcRequest request, int timeout) throws Exception {
 		if(remainRequest.get() >= capacity)
 			throw new RpcClientMaxCapacityException(capacity);
 		EzyFutureMap<String> futures = getFutures(request.getCommand());
 		EzyFuture future = futures.addFuture(request.getId());
 		fire(request);
-		return future.get();
+		return future.get(timeout);
 	}
 	
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public <R,E> void execute(RpcRequest request, RpcCallback<R,E> callback) {
 		if(remainRequest.get() >= capacity)
 			throw new RpcClientMaxCapacityException(capacity);
 		EzyFutureMap<String> futures = getFutures(request.getCommand());
-		futures.addFuture(request.getId(), new EzyCallableFutureTask(new EzyResultCallback<R>() {
+		futures.addFuture(request.getId(), new EzyCallableFutureTask(new EzyResultCallback() {
 			@Override
-			public void onResponse(R response) {
-				callback.onSuccess(response);
+			public void onResponse(Object response) {
+				callback.onSuccess((R)response);
 			}
-			@SuppressWarnings("unchecked")
 			@Override
 			public void onException(Exception e) {
 				if(e instanceof RpcErrorException)
@@ -173,7 +184,7 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 			.addDataHandler(EzyCommand.APP_ACCESS, new EzyAppAccessHandler() {
 				@Override
 				protected void postHandle(EzyApp app, EzyArray data) {
-					app.send("$c");
+					app.send("$c", EzyEntityFactory.EMPTY_ARRAY);
 				}
 			});
 		transporter.setup().setupApp("rpc")
@@ -193,7 +204,7 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 						return;
 					}
 					String id = data.get(1, String.class);
-					EzyFuture future = futures.getFuture(id);
+					EzyFuture future = futures.removeFuture(id);
 					if(future == null) {
 						logger.warn("has no future map to command: {} and id: {}", cmd, id);
 						return;
@@ -231,13 +242,15 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 
 	public static class Builder implements EzyBuilder<QuickRpcClient> {
 	
-		protected int capacity;
+		protected int capacity = 10000;
 		protected String name = "default";
 		protected String username = "admin";
 		protected String password = "admin";
 		protected String host = "127.0.0.1";
 		protected int port = 3005;
 		protected int threadPoolSize = 8;
+		protected Map<String, Class<?>> errorTypes = new HashMap<>();
+		protected Map<String, Class<?>> responseTypes = new HashMap<>();
 	
 		public Builder name(String name) {
 			this.name = name;
@@ -271,6 +284,26 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 		
 		public Builder threadPoolSize(int threadPoolSize) {
 			this.threadPoolSize = threadPoolSize;
+			return this;
+		}
+		
+		public Builder mapErrorType(String cmd, Class<?> type) {
+			this.errorTypes.put(cmd, type);
+			return this;
+		}
+		
+		public Builder mapErrorTypes(Map<String, Class<?>> errorTypes) {
+			this.errorTypes.putAll(errorTypes);
+			return this;
+		}
+		
+		public Builder responseType(String cmd, Class<?> type) {
+			this.responseTypes.put(cmd, type);
+			return this;
+		}
+		
+		public Builder responseTypes(Map<String, Class<?>> responseTypes) {
+			this.responseTypes.putAll(responseTypes);
 			return this;
 		}
 	

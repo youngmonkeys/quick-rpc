@@ -10,7 +10,8 @@ public class QuickRpcClientTest {
 		QuickRpcClient client = QuickRpcClient.builder()
 				.build();
 		System.out.println("connect success");
-		client.fire(new RpcRequest("test", "1", EzyEntityFactory.newObject()));
+		RpcRequest request = new RpcRequest("test", "1", EzyEntityFactory.newObject());
+		System.out.println("response: " + client.call(request));
 //		client.close();
 	}
 	
