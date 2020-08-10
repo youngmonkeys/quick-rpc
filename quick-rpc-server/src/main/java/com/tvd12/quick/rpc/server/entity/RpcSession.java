@@ -23,7 +23,7 @@ public class RpcSession {
 	}
 	
 	public void send(String cmd, String responseId, Object data) {
-		EzyData responseData = (EzyData) data;
+		EzyData responseData = marshaller.marshal(data);
 		EzyArray commandData = EzyEntityFactory.newArray();
 		commandData.add(cmd, responseId, responseData);
 		EzyArray response = EzyEntityFactory.newArray();

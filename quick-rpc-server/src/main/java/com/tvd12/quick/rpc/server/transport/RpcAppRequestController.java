@@ -90,7 +90,7 @@ public class RpcAppRequestController
 			Object requestDataRaw = d.get(2);
 			Class requestDataType = requestHandler.getDataType();
 			Object requestData = requestDataRaw;
-			if(unmarshaller != null && requestDataType != null) {
+			if(requestDataType != null) {
 				requestData = unmarshaller.unmarshal(requestDataRaw, requestDataType);
 			}
 			RpcRequest rpcRequest = new RpcRequest<>(session, cmd, requestId, requestData);

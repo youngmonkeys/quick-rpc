@@ -1,90 +1,63 @@
-07 Aug 2020 | 23:23:33,433 | INFO  | qkrpc-client-default-socket-loop | client.handler.EzyDisconnectionHandler |     | handle disconnection, reason: UNKNOWN
-07 Aug 2020 | 23:23:33,438 | INFO  | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | try reconnect to server: 1, wating time: 3000
-07 Aug 2020 | 23:23:33,443 | WARN  | qkrpc-client-default-socket-loop | client.handler.EzyEventHandlers |     | has no handler for event type: TRY_CONNECT
-07 Aug 2020 | 23:30:58,521 | INFO  | qkrpc-client-default-socket-loop | client.handler.EzyDisconnectionHandler |     | handle disconnection, reason: UNKNOWN
-07 Aug 2020 | 23:30:58,526 | INFO  | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | try reconnect to server: 1, wating time: 3000
-07 Aug 2020 | 23:30:58,531 | WARN  | qkrpc-client-default-socket-loop | client.handler.EzyEventHandlers |     | has no handler for event type: TRY_CONNECT
-07 Aug 2020 | 23:31:01,543 | INFO  | qkrpc-client-default-socket-loop | client.handler.EzyConnectionFailureHandler |     | connection failure, reason: CONNECTION_REFUSED
-07 Aug 2020 | 23:31:01,544 | INFO  | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | try reconnect to server: 2, wating time: 3000
-07 Aug 2020 | 23:31:01,548 | WARN  | qkrpc-client-default-socket-loop | client.handler.EzyEventHandlers |     | has no handler for event type: TRY_CONNECT
-07 Aug 2020 | 23:31:04,563 | INFO  | qkrpc-client-default-socket-loop | client.handler.EzyConnectionFailureHandler |     | connection failure, reason: CONNECTION_REFUSED
-07 Aug 2020 | 23:31:04,564 | INFO  | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | try reconnect to server: 3, wating time: 3000
-07 Aug 2020 | 23:31:04,569 | WARN  | qkrpc-client-default-socket-loop | client.handler.EzyEventHandlers |     | has no handler for event type: TRY_CONNECT
-07 Aug 2020 | 23:34:34,316 | INFO  | qkrpc-client-default-socket-loop | client.handler.EzyDisconnectionHandler |     | handle disconnection, reason: UNKNOWN
-07 Aug 2020 | 23:34:34,326 | INFO  | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | try reconnect to server: 1, wating time: 3000
-07 Aug 2020 | 23:34:34,334 | WARN  | qkrpc-client-default-socket-loop | client.handler.EzyEventHandlers |     | has no handler for event type: TRY_CONNECT
-07 Aug 2020 | 23:34:37,340 | INFO  | qkrpc-client-default-socket-loop | client.handler.EzyConnectionFailureHandler |     | connection failure, reason: CONNECTION_REFUSED
-07 Aug 2020 | 23:34:37,341 | INFO  | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | try reconnect to server: 2, wating time: 3000
-07 Aug 2020 | 23:34:37,345 | WARN  | qkrpc-client-default-socket-loop | client.handler.EzyEventHandlers |     | has no handler for event type: TRY_CONNECT
-07 Aug 2020 | 23:34:40,354 | INFO  | qkrpc-client-default-socket-loop | client.handler.EzyConnectionFailureHandler |     | connection failure, reason: CONNECTION_REFUSED
-07 Aug 2020 | 23:34:40,359 | INFO  | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | try reconnect to server: 3, wating time: 3000
-07 Aug 2020 | 23:34:40,363 | WARN  | qkrpc-client-default-socket-loop | client.handler.EzyEventHandlers |     | has no handler for event type: TRY_CONNECT
-07 Aug 2020 | 23:34:44,062 | INFO  | qkrpc-client-default-socket-loop | client.handler.EzyDisconnectionHandler |     | handle disconnection, reason: UNKNOWN
-07 Aug 2020 | 23:34:44,062 | INFO  | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | try reconnect to server: 1, wating time: 3000
-07 Aug 2020 | 23:34:44,067 | WARN  | qkrpc-client-default-socket-loop | client.handler.EzyEventHandlers |     | has no handler for event type: TRY_CONNECT
-07 Aug 2020 | 23:34:54,082 | DEBUG | qkrpc-client-default-socket-loop | ezyfoxserver.client.EzyTcpClient |     | send command: HANDSHAKE and data: [96a2c295-1338-4c25-ac39-38bb92572cd8, , JAVA, 1.0.0, false, ]
-07 Aug 2020 | 23:34:54,284 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: HANDSHAKE and data: [, dec6f8c1b3eea9beeaecf102795e350761950122494b4c36c481d7bc322b2abe, 1]
-07 Aug 2020 | 23:34:54,294 | DEBUG | qkrpc-client-default-socket-loop | ezyfoxserver.client.EzyTcpClient |     | send command: LOGIN and data: [rpc, admin, admin, null]
-07 Aug 2020 | 23:34:54,308 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: LOGIN and data: [1, rpc, 1, admin, null]
-07 Aug 2020 | 23:34:54,316 | DEBUG | qkrpc-client-default-socket-loop | ezyfoxserver.client.EzyTcpClient |     | send command: APP_ACCESS and data: [rpc, null]
-07 Aug 2020 | 23:34:54,318 | DEBUG | qkrpc-client-default-socket-loop | rpc.client.QuickRpcClient$3 |     | user: User(id: 1, name: admin) logged in successfully
-07 Aug 2020 | 23:34:54,322 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: APP_ACCESS and data: [1, rpc, []]
-07 Aug 2020 | 23:34:54,324 | DEBUG | qkrpc-client-default-socket-loop | ezyfoxserver.client.EzyTcpClient |     | send command: APP_REQUEST and data: [1, [$c, com.tvd12.ezyfox.entity.EzyEmptyArray@4f8517ad]]
-07 Aug 2020 | 23:34:54,340 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: APP_REQUEST and data: [1, [$c, null]]
-07 Aug 2020 | 23:34:54,350 | DEBUG | main | ezyfoxserver.client.EzyTcpClient |     | send command: APP_REQUEST and data: [1, [test, 1, {}]]
-07 Aug 2020 | 23:35:44,007 | INFO  | qkrpc-client-default-socket-loop | client.handler.EzyDisconnectionHandler |     | handle disconnection, reason: UNKNOWN
-07 Aug 2020 | 23:35:44,008 | INFO  | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | try reconnect to server: 1, wating time: 3000
-07 Aug 2020 | 23:35:44,012 | WARN  | qkrpc-client-default-socket-loop | client.handler.EzyEventHandlers |     | has no handler for event type: TRY_CONNECT
-07 Aug 2020 | 23:36:10,573 | DEBUG | qkrpc-client-default-socket-loop | ezyfoxserver.client.EzyTcpClient |     | send command: HANDSHAKE and data: [f39eabc1-fb9e-4da1-ad6a-b870a876ef03, , JAVA, 1.0.0, false, ]
-07 Aug 2020 | 23:36:10,765 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: HANDSHAKE and data: [, 50fc66c3e560ac2150ef8aaf7b64159c9f29aeb2703edeef71b5d9c3c470cb62, 1]
-07 Aug 2020 | 23:36:10,768 | DEBUG | qkrpc-client-default-socket-loop | ezyfoxserver.client.EzyTcpClient |     | send command: LOGIN and data: [rpc, admin, admin, null]
-07 Aug 2020 | 23:36:10,812 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: LOGIN and data: [1, rpc, 1, admin, null]
-07 Aug 2020 | 23:36:10,818 | DEBUG | qkrpc-client-default-socket-loop | ezyfoxserver.client.EzyTcpClient |     | send command: APP_ACCESS and data: [rpc, null]
-07 Aug 2020 | 23:36:10,821 | DEBUG | qkrpc-client-default-socket-loop | rpc.client.QuickRpcClient$3 |     | user: User(id: 1, name: admin) logged in successfully
-07 Aug 2020 | 23:36:10,829 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: APP_ACCESS and data: [1, rpc, []]
-07 Aug 2020 | 23:36:10,831 | DEBUG | qkrpc-client-default-socket-loop | ezyfoxserver.client.EzyTcpClient |     | send command: APP_REQUEST and data: [1, [$c, com.tvd12.ezyfox.entity.EzyEmptyArray@4f8517ad]]
-07 Aug 2020 | 23:36:10,859 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: APP_REQUEST and data: [1, [$c, null]]
-07 Aug 2020 | 23:36:10,867 | DEBUG | main | ezyfoxserver.client.EzyTcpClient |     | send command: APP_REQUEST and data: [1, [test, 1, {}]]
-07 Aug 2020 | 23:37:19,632 | DEBUG | qkrpc-client-default-socket-loop | ezyfoxserver.client.EzyTcpClient |     | send command: HANDSHAKE and data: [e17c23be-9b9e-4446-acf0-bb39214461c3, , JAVA, 1.0.0, false, ]
-07 Aug 2020 | 23:37:19,643 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: HANDSHAKE and data: [, c3be41416c02232e67ca4983e5794bdedb1aadb37391be6eb46d50f9d5d1723a, 2]
-07 Aug 2020 | 23:37:19,647 | DEBUG | qkrpc-client-default-socket-loop | ezyfoxserver.client.EzyTcpClient |     | send command: LOGIN and data: [rpc, admin, admin, null]
-07 Aug 2020 | 23:37:19,658 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: LOGIN and data: [1, rpc, 2, admin, null]
-07 Aug 2020 | 23:37:19,666 | DEBUG | qkrpc-client-default-socket-loop | ezyfoxserver.client.EzyTcpClient |     | send command: APP_ACCESS and data: [rpc, null]
-07 Aug 2020 | 23:37:19,674 | DEBUG | qkrpc-client-default-socket-loop | rpc.client.QuickRpcClient$3 |     | user: User(id: 2, name: admin) logged in successfully
-07 Aug 2020 | 23:37:19,679 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: APP_ACCESS and data: [1, rpc, []]
-07 Aug 2020 | 23:37:19,682 | DEBUG | qkrpc-client-default-socket-loop | ezyfoxserver.client.EzyTcpClient |     | send command: APP_REQUEST and data: [1, [$c, com.tvd12.ezyfox.entity.EzyEmptyArray@4f8517ad]]
-07 Aug 2020 | 23:37:19,688 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: APP_REQUEST and data: [1, [$c, null]]
-07 Aug 2020 | 23:37:19,698 | DEBUG | main | ezyfoxserver.client.EzyTcpClient |     | send command: APP_REQUEST and data: [1, [test, [1, {}]]]
-07 Aug 2020 | 23:38:08,756 | DEBUG | qkrpc-client-default-socket-loop | ezyfoxserver.client.EzyTcpClient |     | send command: HANDSHAKE and data: [97546cf9-1aab-4567-9544-46c2b88a988f, , JAVA, 1.0.0, false, ]
-07 Aug 2020 | 23:38:08,767 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: HANDSHAKE and data: [, fc9fd7a7e8972347fbd77702504a6f964d61566fe868a050938a0b5893859bb6, 3]
-07 Aug 2020 | 23:38:08,772 | DEBUG | qkrpc-client-default-socket-loop | ezyfoxserver.client.EzyTcpClient |     | send command: LOGIN and data: [rpc, admin, admin, null]
-07 Aug 2020 | 23:38:08,786 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: LOGIN and data: [1, rpc, 3, admin, null]
-07 Aug 2020 | 23:38:08,797 | DEBUG | qkrpc-client-default-socket-loop | ezyfoxserver.client.EzyTcpClient |     | send command: APP_ACCESS and data: [rpc, null]
-07 Aug 2020 | 23:38:08,806 | DEBUG | qkrpc-client-default-socket-loop | rpc.client.QuickRpcClient$3 |     | user: User(id: 3, name: admin) logged in successfully
-07 Aug 2020 | 23:38:08,818 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: APP_ACCESS and data: [1, rpc, []]
-07 Aug 2020 | 23:38:08,820 | DEBUG | qkrpc-client-default-socket-loop | ezyfoxserver.client.EzyTcpClient |     | send command: APP_REQUEST and data: [1, [$c, com.tvd12.ezyfox.entity.EzyEmptyArray@47fc4c0]]
-07 Aug 2020 | 23:38:08,829 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: APP_REQUEST and data: [1, [$c, null]]
-07 Aug 2020 | 23:38:08,840 | DEBUG | main | ezyfoxserver.client.EzyTcpClient |     | send command: APP_REQUEST and data: [1, [$r, [test, 1, {}]]]
-07 Aug 2020 | 23:38:08,852 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: APP_REQUEST and data: [1, [$r, [test, 1, {}]]]
-07 Aug 2020 | 23:53:15,935 | DEBUG | qkrpc-client-default-socket-loop | ezyfoxserver.client.EzyTcpClient |     | send command: HANDSHAKE and data: [92aa6459-9155-4fca-94f2-259cb004dc82, , JAVA, 1.0.0, false, ]
-07 Aug 2020 | 23:53:15,956 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: HANDSHAKE and data: [, 3557e9c0a2f24e1704e6faf0481c7bc84468291cf099dde9f9e00f85867d34ab, 4]
-07 Aug 2020 | 23:53:15,958 | DEBUG | qkrpc-client-default-socket-loop | ezyfoxserver.client.EzyTcpClient |     | send command: LOGIN and data: [rpc, admin, admin, null]
-07 Aug 2020 | 23:53:15,969 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: LOGIN and data: [1, rpc, 4, admin, null]
-07 Aug 2020 | 23:53:15,975 | DEBUG | qkrpc-client-default-socket-loop | ezyfoxserver.client.EzyTcpClient |     | send command: APP_ACCESS and data: [rpc, null]
-07 Aug 2020 | 23:53:15,977 | DEBUG | qkrpc-client-default-socket-loop | rpc.client.QuickRpcClient$3 |     | user: User(id: 4, name: admin) logged in successfully
-07 Aug 2020 | 23:53:15,984 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: APP_ACCESS and data: [1, rpc, []]
-07 Aug 2020 | 23:53:15,986 | DEBUG | qkrpc-client-default-socket-loop | ezyfoxserver.client.EzyTcpClient |     | send command: APP_REQUEST and data: [1, [$c, com.tvd12.ezyfox.entity.EzyEmptyArray@5fa16361]]
-07 Aug 2020 | 23:53:15,996 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: APP_REQUEST and data: [1, [$c, null]]
-07 Aug 2020 | 23:53:16,005 | DEBUG | main | ezyfoxserver.client.EzyTcpClient |     | send command: APP_REQUEST and data: [1, [$r, [test, 1, {}]]]
-07 Aug 2020 | 23:53:16,015 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: APP_REQUEST and data: [1, [$r, [test, 1, {}]]]
-07 Aug 2020 | 23:56:11,854 | DEBUG | qkrpc-client-default-socket-loop | ezyfoxserver.client.EzyTcpClient |     | send command: HANDSHAKE and data: [64a2cc4d-6159-4922-b9c2-8de6d9d3d845, , JAVA, 1.0.0, false, ]
-07 Aug 2020 | 23:56:12,091 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: HANDSHAKE and data: [, 4067bb3380bd48e2a7f99198c03f7444c804f653f0e53360db6f896e7267fb2a, 1]
-07 Aug 2020 | 23:56:12,094 | DEBUG | qkrpc-client-default-socket-loop | ezyfoxserver.client.EzyTcpClient |     | send command: LOGIN and data: [rpc, admin, admin, null]
-07 Aug 2020 | 23:56:12,120 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: LOGIN and data: [1, rpc, 1, admin, null]
-07 Aug 2020 | 23:56:12,128 | DEBUG | qkrpc-client-default-socket-loop | ezyfoxserver.client.EzyTcpClient |     | send command: APP_ACCESS and data: [rpc, null]
-07 Aug 2020 | 23:56:12,130 | DEBUG | qkrpc-client-default-socket-loop | rpc.client.QuickRpcClient$3 |     | user: User(id: 1, name: admin) logged in successfully
-07 Aug 2020 | 23:56:12,141 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: APP_ACCESS and data: [1, rpc, []]
-07 Aug 2020 | 23:56:12,142 | DEBUG | qkrpc-client-default-socket-loop | ezyfoxserver.client.EzyTcpClient |     | send command: APP_REQUEST and data: [1, [$c, com.tvd12.ezyfox.entity.EzyEmptyArray@5fa16361]]
-07 Aug 2020 | 23:56:12,158 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: APP_REQUEST and data: [1, [$c, null]]
-07 Aug 2020 | 23:56:12,166 | DEBUG | main | ezyfoxserver.client.EzyTcpClient |     | send command: APP_REQUEST and data: [1, [$r, [test, 1, {}]]]
-07 Aug 2020 | 23:56:12,186 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: APP_REQUEST and data: [1, [$r, [test, 1, {}]]]
+10 Aug 2020 | 21:05:32,847 | DEBUG | qkrpc-client-default-socket-loop | ezyfoxserver.client.EzyTcpClient |     | send command: HANDSHAKE and data: [97ef6628-dcef-455a-b8d0-1ee29f85bdf2, , JAVA, 1.0.0, false, ]
+10 Aug 2020 | 21:05:33,267 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: HANDSHAKE and data: [, a50a1618c06721978f49832da3b1807769aa4f2ef295c942443293584749b830, 1]
+10 Aug 2020 | 21:05:33,273 | DEBUG | qkrpc-client-default-socket-loop | ezyfoxserver.client.EzyTcpClient |     | send command: LOGIN and data: [rpc, admin, admin, null]
+10 Aug 2020 | 21:05:33,309 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: LOGIN and data: [1, rpc, 1, admin, null]
+10 Aug 2020 | 21:05:33,324 | DEBUG | qkrpc-client-default-socket-loop | ezyfoxserver.client.EzyTcpClient |     | send command: APP_ACCESS and data: [rpc, null]
+10 Aug 2020 | 21:05:33,332 | DEBUG | qkrpc-client-default-socket-loop | rpc.client.QuickRpcClient$3 |     | user: User(id: 1, name: admin) logged in successfully
+10 Aug 2020 | 21:05:33,337 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: APP_ACCESS and data: [1, rpc, []]
+10 Aug 2020 | 21:05:33,341 | DEBUG | qkrpc-client-default-socket-loop | ezyfoxserver.client.EzyTcpClient |     | send command: APP_REQUEST and data: [1, [$c, com.tvd12.ezyfox.entity.EzyEmptyArray@27577f56]]
+10 Aug 2020 | 21:05:33,379 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: APP_REQUEST and data: [1, [$c, null]]
+10 Aug 2020 | 21:06:41,885 | DEBUG | main | binding.impl.EzyObjectWriterElementsFetcher |     | start scan class com.tvd12.quick.rpc.client.test.data.GreetRequest
+10 Aug 2020 | 21:06:41,907 | DEBUG | main | binding.impl.EzyObjectWriterElementsFetcher |     | scan field who
+10 Aug 2020 | 21:06:41,909 | DEBUG | main | binding.impl.EzyObjectWriterElementsFetcher |     | finish scan class com.tvd12.quick.rpc.client.test.data.GreetRequest
+10 Aug 2020 | 21:06:42,043 | DEBUG | main | binding.impl.EzyObjectWriterBuilder |     | class com.tvd12.quick.rpc.client.test.data.GreetRequest$EzyObjectWriter$EzyAutoImpl$1 has generated
+10 Aug 2020 | 21:06:42,050 | DEBUG | main | binding.impl.EzyObjectWriterElementsFetcher |     | start scan class com.tvd12.quick.rpc.client.test.data.GreetResponse
+10 Aug 2020 | 21:06:42,050 | DEBUG | main | binding.impl.EzyObjectWriterElementsFetcher |     | scan field message
+10 Aug 2020 | 21:06:42,050 | DEBUG | main | binding.impl.EzyObjectWriterElementsFetcher |     | finish scan class com.tvd12.quick.rpc.client.test.data.GreetResponse
+10 Aug 2020 | 21:06:42,055 | DEBUG | main | binding.impl.EzyObjectWriterBuilder |     | class com.tvd12.quick.rpc.client.test.data.GreetResponse$EzyObjectWriter$EzyAutoImpl$2 has generated
+10 Aug 2020 | 21:06:42,062 | DEBUG | main | binding.impl.EzyObjectReaderElementsFetcher |     | start scan class com.tvd12.quick.rpc.client.test.data.GreetResponse
+10 Aug 2020 | 21:06:42,063 | DEBUG | main | binding.impl.EzyObjectReaderElementsFetcher |     | scan field message
+10 Aug 2020 | 21:06:42,065 | DEBUG | main | binding.impl.EzyObjectReaderElementsFetcher |     | finish scan class com.tvd12.quick.rpc.client.test.data.GreetResponse
+10 Aug 2020 | 21:06:42,074 | DEBUG | main | binding.impl.EzyObjectReaderBuilder |     | class com.tvd12.quick.rpc.client.test.data.GreetResponse$EzyObjectReader$EzyAutoImpl$1 has generated
+10 Aug 2020 | 21:06:42,076 | DEBUG | main | binding.impl.EzyObjectReaderElementsFetcher |     | start scan class com.tvd12.quick.rpc.client.test.data.GreetResponse
+10 Aug 2020 | 21:06:42,077 | DEBUG | main | binding.impl.EzyObjectReaderElementsFetcher |     | scan field message
+10 Aug 2020 | 21:06:42,077 | DEBUG | main | binding.impl.EzyObjectReaderElementsFetcher |     | finish scan class com.tvd12.quick.rpc.client.test.data.GreetResponse
+10 Aug 2020 | 21:06:42,082 | DEBUG | main | binding.impl.EzyObjectUnwrapperBuilder |     | class com.tvd12.quick.rpc.client.test.data.GreetResponse$EzyObjectUnwrapper$EzyAutoImpl$1 has generated
+10 Aug 2020 | 21:06:42,399 | DEBUG | qkrpc-client-default-socket-loop | ezyfoxserver.client.EzyTcpClient |     | send command: HANDSHAKE and data: [c0206785-cebe-4c38-a0b2-502efe745c5a, , JAVA, 1.0.0, false, ]
+10 Aug 2020 | 21:06:42,431 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: HANDSHAKE and data: [, f9fe09851ef801cc0b78ddfaddae05290258c3361a395fff28a5810fb483163b, 2]
+10 Aug 2020 | 21:06:42,435 | DEBUG | qkrpc-client-default-socket-loop | ezyfoxserver.client.EzyTcpClient |     | send command: LOGIN and data: [rpc, admin, admin, null]
+10 Aug 2020 | 21:06:42,442 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: LOGIN and data: [1, rpc, 2, admin, null]
+10 Aug 2020 | 21:06:42,452 | DEBUG | qkrpc-client-default-socket-loop | ezyfoxserver.client.EzyTcpClient |     | send command: APP_ACCESS and data: [rpc, null]
+10 Aug 2020 | 21:06:42,452 | DEBUG | qkrpc-client-default-socket-loop | rpc.client.QuickRpcClient$3 |     | user: User(id: 2, name: admin) logged in successfully
+10 Aug 2020 | 21:06:42,459 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: APP_ACCESS and data: [1, rpc, []]
+10 Aug 2020 | 21:06:42,462 | DEBUG | qkrpc-client-default-socket-loop | ezyfoxserver.client.EzyTcpClient |     | send command: APP_REQUEST and data: [1, [$c, com.tvd12.ezyfox.entity.EzyEmptyArray@61919ae1]]
+10 Aug 2020 | 21:06:42,470 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: APP_REQUEST and data: [1, [$c, null]]
+10 Aug 2020 | 21:06:42,560 | DEBUG | main | ezyfoxserver.client.EzyTcpClient |     | send command: APP_REQUEST and data: [1, [$r, [Greet, 1, {who=Dzung}]]]
+10 Aug 2020 | 21:06:42,573 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: APP_REQUEST and data: [1, [$r, [Greet, 1, {message=Greet Dzung!}]]]
+10 Aug 2020 | 21:07:38,115 | DEBUG | main | binding.impl.EzyObjectWriterElementsFetcher |     | start scan class com.tvd12.quick.rpc.client.test.data.GreetRequest
+10 Aug 2020 | 21:07:38,135 | DEBUG | main | binding.impl.EzyObjectWriterElementsFetcher |     | scan field who
+10 Aug 2020 | 21:07:38,137 | DEBUG | main | binding.impl.EzyObjectWriterElementsFetcher |     | finish scan class com.tvd12.quick.rpc.client.test.data.GreetRequest
+10 Aug 2020 | 21:07:38,266 | DEBUG | main | binding.impl.EzyObjectWriterBuilder |     | class com.tvd12.quick.rpc.client.test.data.GreetRequest$EzyObjectWriter$EzyAutoImpl$1 has generated
+10 Aug 2020 | 21:07:38,269 | DEBUG | main | binding.impl.EzyObjectWriterElementsFetcher |     | start scan class com.tvd12.quick.rpc.client.test.data.GreetResponse
+10 Aug 2020 | 21:07:38,270 | DEBUG | main | binding.impl.EzyObjectWriterElementsFetcher |     | scan field message
+10 Aug 2020 | 21:07:38,270 | DEBUG | main | binding.impl.EzyObjectWriterElementsFetcher |     | finish scan class com.tvd12.quick.rpc.client.test.data.GreetResponse
+10 Aug 2020 | 21:07:38,272 | DEBUG | main | binding.impl.EzyObjectWriterBuilder |     | class com.tvd12.quick.rpc.client.test.data.GreetResponse$EzyObjectWriter$EzyAutoImpl$2 has generated
+10 Aug 2020 | 21:07:38,283 | DEBUG | main | binding.impl.EzyObjectReaderElementsFetcher |     | start scan class com.tvd12.quick.rpc.client.test.data.GreetResponse
+10 Aug 2020 | 21:07:38,284 | DEBUG | main | binding.impl.EzyObjectReaderElementsFetcher |     | scan field message
+10 Aug 2020 | 21:07:38,285 | DEBUG | main | binding.impl.EzyObjectReaderElementsFetcher |     | finish scan class com.tvd12.quick.rpc.client.test.data.GreetResponse
+10 Aug 2020 | 21:07:38,293 | DEBUG | main | binding.impl.EzyObjectReaderBuilder |     | class com.tvd12.quick.rpc.client.test.data.GreetResponse$EzyObjectReader$EzyAutoImpl$1 has generated
+10 Aug 2020 | 21:07:38,295 | DEBUG | main | binding.impl.EzyObjectReaderElementsFetcher |     | start scan class com.tvd12.quick.rpc.client.test.data.GreetResponse
+10 Aug 2020 | 21:07:38,296 | DEBUG | main | binding.impl.EzyObjectReaderElementsFetcher |     | scan field message
+10 Aug 2020 | 21:07:38,296 | DEBUG | main | binding.impl.EzyObjectReaderElementsFetcher |     | finish scan class com.tvd12.quick.rpc.client.test.data.GreetResponse
+10 Aug 2020 | 21:07:38,299 | DEBUG | main | binding.impl.EzyObjectUnwrapperBuilder |     | class com.tvd12.quick.rpc.client.test.data.GreetResponse$EzyObjectUnwrapper$EzyAutoImpl$1 has generated
+10 Aug 2020 | 21:07:38,661 | DEBUG | qkrpc-client-default-socket-loop | ezyfoxserver.client.EzyTcpClient |     | send command: HANDSHAKE and data: [4b44e9dc-f2c9-4ba8-a417-1d46b613028e, , JAVA, 1.0.0, false, ]
+10 Aug 2020 | 21:07:38,674 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: HANDSHAKE and data: [, 302bb024a9fe7f83bc50cbe29c4e15b67d549672819cc66a5786414471004d0c, 3]
+10 Aug 2020 | 21:07:38,722 | DEBUG | qkrpc-client-default-socket-loop | ezyfoxserver.client.EzyTcpClient |     | send command: LOGIN and data: [rpc, admin, admin, null]
+10 Aug 2020 | 21:07:38,736 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: LOGIN and data: [1, rpc, 3, admin, null]
+10 Aug 2020 | 21:07:38,752 | DEBUG | qkrpc-client-default-socket-loop | ezyfoxserver.client.EzyTcpClient |     | send command: APP_ACCESS and data: [rpc, null]
+10 Aug 2020 | 21:07:38,756 | DEBUG | qkrpc-client-default-socket-loop | rpc.client.QuickRpcClient$3 |     | user: User(id: 3, name: admin) logged in successfully
+10 Aug 2020 | 21:07:38,761 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: APP_ACCESS and data: [1, rpc, []]
+10 Aug 2020 | 21:07:38,766 | DEBUG | qkrpc-client-default-socket-loop | ezyfoxserver.client.EzyTcpClient |     | send command: APP_REQUEST and data: [1, [$c, com.tvd12.ezyfox.entity.EzyEmptyArray@e2d9a9]]
+10 Aug 2020 | 21:07:38,775 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: APP_REQUEST and data: [1, [$c, null]]
+10 Aug 2020 | 21:07:38,871 | DEBUG | main | ezyfoxserver.client.EzyTcpClient |     | send command: APP_REQUEST and data: [1, [$r, [Greet, 1, {who=Dzung}]]]
+10 Aug 2020 | 21:07:38,877 | DEBUG | qkrpc-client-default-socket-loop | client.socket.EzyTcpSocketClient |     | received command: APP_REQUEST and data: [1, [$r, [Greet, 1, {message=Greet Dzung!}]]]

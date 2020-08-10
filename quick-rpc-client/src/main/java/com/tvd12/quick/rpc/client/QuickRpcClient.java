@@ -1,10 +1,17 @@
 package com.tvd12.quick.rpc.client;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.tvd12.ezyfox.binding.EzyBindingContext;
+import com.tvd12.ezyfox.binding.EzyBindingContextBuilder;
+import com.tvd12.ezyfox.binding.EzyMarshaller;
+import com.tvd12.ezyfox.binding.EzyUnmarshaller;
 import com.tvd12.ezyfox.builder.EzyBuilder;
 import com.tvd12.ezyfox.concurrent.EzyCallableFutureTask;
 import com.tvd12.ezyfox.concurrent.EzyFuture;
@@ -15,6 +22,9 @@ import com.tvd12.ezyfox.concurrent.callback.EzyResultCallback;
 import com.tvd12.ezyfox.entity.EzyArray;
 import com.tvd12.ezyfox.entity.EzyData;
 import com.tvd12.ezyfox.factory.EzyEntityFactory;
+import com.tvd12.ezyfox.io.EzyMaps;
+import com.tvd12.ezyfox.reflect.EzyReflection;
+import com.tvd12.ezyfox.reflect.EzyReflectionProxy;
 import com.tvd12.ezyfox.util.EzyCloseable;
 import com.tvd12.ezyfox.util.EzyLoggable;
 import com.tvd12.ezyfoxserver.client.EzyClient;
@@ -32,12 +42,15 @@ import com.tvd12.ezyfoxserver.client.handler.EzyLoginSuccessHandler;
 import com.tvd12.ezyfoxserver.client.request.EzyAppAccessRequest;
 import com.tvd12.ezyfoxserver.client.request.EzyLoginRequest;
 import com.tvd12.ezyfoxserver.client.request.EzyRequest;
+import com.tvd12.quick.rpc.client.annotation.RpcResponseData;
 import com.tvd12.quick.rpc.client.callback.RpcCallback;
 import com.tvd12.quick.rpc.client.exception.RpcClientLoginFailureException;
 import com.tvd12.quick.rpc.client.exception.RpcClientMaxCapacityException;
 import com.tvd12.quick.rpc.client.exception.RpcErrorException;
 import com.tvd12.quick.rpc.client.request.RpcRequest;
+import com.tvd12.quick.rpc.client.util.RpcResponseDataAnnotations;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 
 	protected final String name;
@@ -51,8 +64,11 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 	protected EzyClient transporter;
 	protected EzyApp transporterApp;
 	protected final AtomicInteger remainRequest;
-	protected final Map<String, Class<?>> errorTypes;
-	protected final Map<String, Class<?>> responseTypes;
+	protected final EzyMarshaller marshaller;
+	protected final EzyUnmarshaller unmarshaller;
+	protected final EzyBindingContext bindingContext;
+	protected final Map<String, Class> errorTypes;
+	protected final Map<String, Class> responseTypes;
 	protected final Map<String, EzyFutureMap<String>> futureMap;
 
 	protected QuickRpcClient(Builder builder) {
@@ -69,13 +85,17 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 		this.transporterApp = transporter.getApp();
 		this.active = true;
 		this.remainRequest = new AtomicInteger();
+		this.bindingContext = builder.bindingContext;
+		this.marshaller = bindingContext.newMarshaller();
+		this.unmarshaller = bindingContext.newUnmarshaller();
 		this.errorTypes = new HashMap<>(builder.errorTypes);
 		this.responseTypes = new HashMap<>(builder.responseTypes);
 	}
 
 	public void fire(RpcRequest request) {
 		EzyArray commandData = EzyEntityFactory.newArray();
-		commandData.add(request.getCommand(), request.getId(), request.getData());
+		Object mdata = marshaller.marshal(request.getData());
+		commandData.add(request.getCommand(), request.getId(), mdata);
 		EzyArray sdata = EzyEntityFactory.newArray();
 		sdata.add("$r", commandData);
 		transporterApp.send(sdata);
@@ -94,7 +114,6 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 		return future.get(timeout);
 	}
 	
-	@SuppressWarnings({"rawtypes", "unchecked"})
 	public <R,E> void execute(RpcRequest request, RpcCallback<R,E> callback) {
 		if(remainRequest.get() >= capacity)
 			throw new RpcClientMaxCapacityException(capacity);
@@ -249,8 +268,10 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 		protected String host = "127.0.0.1";
 		protected int port = 3005;
 		protected int threadPoolSize = 8;
-		protected Map<String, Class<?>> errorTypes = new HashMap<>();
-		protected Map<String, Class<?>> responseTypes = new HashMap<>();
+		protected EzyBindingContext bindingContext;
+		protected Set<String> packagesToScan = new HashSet<>();
+		protected Map<String, Class> errorTypes = new HashMap<>();
+		protected Map<String, Class> responseTypes = new HashMap<>();
 	
 		public Builder name(String name) {
 			this.name = name;
@@ -287,6 +308,26 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 			return this;
 		}
 		
+		public Builder scan(String packageToScan) {
+			this.packagesToScan.add(packageToScan);
+			return this;
+		}
+		
+		public Builder scan(String... packagesToScan) {
+			return scan(Arrays.asList(packagesToScan));
+		}
+		
+		public Builder scan(Iterable<String> packagesToScan) {
+			for(String packageToScan : packagesToScan)
+				scan(packageToScan);
+			return this;
+		}
+		
+		public Builder bindingContext(EzyBindingContext bindingContext) {
+			this.bindingContext = bindingContext;
+			return this;
+		}
+		
 		public Builder mapErrorType(String cmd, Class<?> type) {
 			this.errorTypes.put(cmd, type);
 			return this;
@@ -297,18 +338,37 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 			return this;
 		}
 		
-		public Builder responseType(String cmd, Class<?> type) {
+		public Builder mapResponseType(String cmd, Class<?> type) {
 			this.responseTypes.put(cmd, type);
 			return this;
 		}
 		
-		public Builder responseTypes(Map<String, Class<?>> responseTypes) {
+		public Builder mapResponseTypes(Map<String, Class<?>> responseTypes) {
 			this.responseTypes.putAll(responseTypes);
 			return this;
 		}
 	
 		@Override
 		public QuickRpcClient build() {
+			EzyReflection reflection = null;
+			if(packagesToScan.size() > 0)
+				reflection = new EzyReflectionProxy(packagesToScan);
+			if(reflection != null) {
+				responseTypes.putAll(EzyMaps.newHashMap(
+						reflection.getAnnotatedClasses(RpcResponseData.class), 
+						c -> RpcResponseDataAnnotations.getCommand(c)));
+				responseTypes.putAll(EzyMaps.newHashMap(
+						reflection.getAnnotatedClasses(RpcResponseData.class), 
+						c -> RpcResponseDataAnnotations.getCommand(c)));
+			}
+			if(bindingContext == null) {
+				EzyBindingContextBuilder builder = EzyBindingContext.builder()
+					.addClasses(responseTypes.values())
+					.addClasses(errorTypes.values());
+				if(reflection != null)
+					builder.addAllClasses(reflection);
+				bindingContext = builder.build();
+			}
 			return new QuickRpcClient(this);
 		}
 	

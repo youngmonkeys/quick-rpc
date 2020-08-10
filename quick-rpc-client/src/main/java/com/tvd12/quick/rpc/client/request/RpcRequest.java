@@ -1,5 +1,6 @@
 package com.tvd12.quick.rpc.client.request;
 
+import com.tvd12.ezyfox.builder.EzyBuilder;
 import com.tvd12.ezyfox.util.EzyEquals;
 import com.tvd12.ezyfox.util.EzyHashCodes;
 
@@ -45,6 +46,38 @@ public class RpcRequest {
 					.append("data: ").append(data)
 				.append(")")
 				.toString();
+	}
+	
+	public static Builder builder() {
+		return new Builder();
+	}
+	
+	public static class Builder implements EzyBuilder<RpcRequest> {
+		
+		protected String id;
+		protected Object data;
+		protected String command;
+	
+		public Builder id(String id) {
+			this.id = id;
+			return this;
+		}
+	
+		public Builder data(Object data) {
+			this.data = data;
+			return this;
+		}
+	
+		public Builder command(String command) {
+			this.command = command;
+			return this;
+		}
+	
+		@Override
+		public RpcRequest build() {
+			return new RpcRequest(command, id, data);
+		}
+	
 	}
 	
 }
