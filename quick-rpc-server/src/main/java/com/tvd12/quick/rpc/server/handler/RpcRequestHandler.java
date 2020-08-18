@@ -12,10 +12,10 @@ public interface RpcRequestHandler<D> {
 	default Class<D> getDataType() {
 		try {
 			return EzyGenerics.getGenericInterfacesArguments(
-					getClass(), RpcRequestHandler.class, 1)[0];
+					getClass(), 
+					RpcRequestHandler.class, 1)[0];
 		}
 		catch (Exception e) {
-			e.printStackTrace();
 			return null; 
 		}
 	}

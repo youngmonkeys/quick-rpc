@@ -8,10 +8,14 @@ import java.util.Map;
 import java.util.Set;
 
 import com.tvd12.ezyfox.bean.EzyBeanContext;
+import com.tvd12.ezyfox.bean.EzyBeanContextBuilder;
 import com.tvd12.ezyfox.binding.EzyBindingContext;
+import com.tvd12.ezyfox.binding.EzyBindingContextBuilder;
 import com.tvd12.ezyfox.binding.EzyMarshaller;
 import com.tvd12.ezyfox.binding.EzyUnmarshaller;
 import com.tvd12.ezyfox.io.EzyMaps;
+import com.tvd12.ezyfox.reflect.EzyReflection;
+import com.tvd12.ezyfox.reflect.EzyReflectionProxy;
 import com.tvd12.ezyfox.util.EzyLoggable;
 import com.tvd12.ezyfox.util.EzyStoppable;
 import com.tvd12.ezyfoxserver.config.EzyConfig;
@@ -20,16 +24,22 @@ import com.tvd12.ezyfoxserver.embedded.EzyEmbeddedServer;
 import com.tvd12.ezyfoxserver.setting.EzyAdminSettingBuilder;
 import com.tvd12.ezyfoxserver.setting.EzyAppSettingBuilder;
 import com.tvd12.ezyfoxserver.setting.EzyPluginSettingBuilder;
+import com.tvd12.ezyfoxserver.setting.EzySessionManagementSettingBuilder;
+import com.tvd12.ezyfoxserver.setting.EzySessionManagementSettingBuilder.EzyMaxRequestPerSecondBuilder;
 import com.tvd12.ezyfoxserver.setting.EzySettings;
 import com.tvd12.ezyfoxserver.setting.EzySettingsBuilder;
 import com.tvd12.ezyfoxserver.setting.EzySimpleAdminSetting;
 import com.tvd12.ezyfoxserver.setting.EzySimpleAppSetting;
 import com.tvd12.ezyfoxserver.setting.EzySimplePluginSetting;
+import com.tvd12.ezyfoxserver.setting.EzySimpleSessionManagementSetting;
+import com.tvd12.ezyfoxserver.setting.EzySimpleSessionManagementSetting.EzySimpleMaxRequestPerSecond;
 import com.tvd12.ezyfoxserver.setting.EzySimpleUserManagementSetting;
 import com.tvd12.ezyfoxserver.setting.EzySimpleZoneSetting;
 import com.tvd12.ezyfoxserver.setting.EzyUserManagementSettingBuilder;
 import com.tvd12.ezyfoxserver.setting.EzyZoneSettingBuilder;
+import com.tvd12.quick.rpc.server.annotation.RpcController;
 import com.tvd12.quick.rpc.server.annotation.RpcHandler;
+import com.tvd12.quick.rpc.server.asm.RpcRequestHandlersImplementer;
 import com.tvd12.quick.rpc.server.handler.RpcRequestHandler;
 import com.tvd12.quick.rpc.server.handler.RpcRequestHandlers;
 import com.tvd12.quick.rpc.server.manager.RpcComponentManager;
@@ -87,22 +97,35 @@ public class QuickRpcServer extends EzyLoggable implements EzyStoppable {
 	
 	@SuppressWarnings("unchecked")
 	public RpcServerContext start() throws Exception {
+		EzyReflection reflection = null;
+		if(packagesToScan.size() > 0)
+			reflection = new EzyReflectionProxy(packagesToScan);
 		RpcSessionManager sessionManager = new RpcSessionManager();
 		if(beanContext == null) {
-			beanContext = EzyBeanContext.builder()
-				.scan(packagesToScan)
-				.build();
+			EzyBeanContextBuilder builder = EzyBeanContext.builder();
+			if(reflection != null) {
+				builder.addSingletonClasses((Set)reflection.getAnnotatedClasses(RpcHandler.class))
+					.addSingletonClasses((Set)reflection.getAnnotatedClasses(RpcController.class))
+					.addAllClasses(reflection)
+					.addSingleton("sessionManager", sessionManager);
+			}
+			beanContext = builder.build();
 		}
 		if(bindingContext == null) {
-			bindingContext = EzyBindingContext.builder()
-				.scan(packagesToScan)
-				.build();
+			EzyBindingContextBuilder builder = EzyBindingContext.builder();
+			if(reflection != null) {
+				builder.addAllClasses(reflection);
+			}
+			bindingContext = builder.build();
 		}
-		List requestHandlerBeans = beanContext.getSingletons(RpcHandler.class);
+		List<Object> controllers = beanContext.getSingletons(RpcController.class);
+		RpcRequestHandlersImplementer implementer = new RpcRequestHandlersImplementer();
+		requestHandlers.putAll(implementer.implement(controllers));
+		requestHandlers.putAll(EzyMaps.newHashMap(
+				beanContext.getSingletons(RpcHandler.class), 
+				b -> RpcHandlerAnnotations.getCommand(b.getClass())));
 		RpcRequestHandlers requestHandlers = RpcRequestHandlers.builder()
 				.addHandlers(this.requestHandlers)
-				.addHandlers(EzyMaps.newHashMap(
-						requestHandlerBeans, b -> RpcHandlerAnnotations.getCommand(b.getClass())))
 				.build();
 		RpcComponentManager componentManager = RpcComponentManager.getInstance();
 		componentManager.addComponent(EzyBeanContext.class, beanContext);
@@ -134,10 +157,17 @@ public class QuickRpcServer extends EzyLoggable implements EzyStoppable {
 				.application(appSetting)
 				.userManagement(userManagementSetting)
 				.build();
+		EzySimpleMaxRequestPerSecond maxRequestPerSecondSetting = new EzyMaxRequestPerSecondBuilder()
+				.value(Integer.MAX_VALUE)
+				.build();
+		EzySimpleSessionManagementSetting sessionManagementSetting = new EzySessionManagementSettingBuilder()
+				.sessionMaxRequestPerSecond(maxRequestPerSecondSetting)
+				.build();
 		EzySettings settings = new EzySettingsBuilder()
 				.nodeName("rpc")
 				.admin(adminSetting)
 				.zone(zoneSetting)
+				.sessionManagement(sessionManagementSetting)
 				.build();
 		EzyConfig config = new EzyConfigBuilder()
 				.bannerFile("quick-rpc-banner.txt")
@@ -156,5 +186,10 @@ public class QuickRpcServer extends EzyLoggable implements EzyStoppable {
 			transporter.stop();
 	}
 	
-	
+	@Override
+	public String toString() {
+		return new StringBuilder()
+				.append("requestHandlers: ").append(requestHandlers)
+				.toString();
+	}
 }
