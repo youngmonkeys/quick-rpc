@@ -1,4 +1,4 @@
-package com.tvd12.quick.rpc.client.request;
+package com.tvd12.quick.rpc.client.entity;
 
 import com.tvd12.ezyfox.builder.EzyBuilder;
 import com.tvd12.ezyfox.util.EzyEquals;

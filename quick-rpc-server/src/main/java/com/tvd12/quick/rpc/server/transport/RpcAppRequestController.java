@@ -17,6 +17,7 @@ import com.tvd12.ezyfoxserver.event.EzyUserRequestAppEvent;
 import com.tvd12.quick.rpc.server.entity.RpcRequest;
 import com.tvd12.quick.rpc.server.entity.RpcResponse;
 import com.tvd12.quick.rpc.server.entity.RpcSession;
+import com.tvd12.quick.rpc.server.exception.RpcHandleErrorException;
 import com.tvd12.quick.rpc.server.handler.RpcRequestHandler;
 import com.tvd12.quick.rpc.server.handler.RpcRequestHandlers;
 import com.tvd12.quick.rpc.server.manager.RpcComponentManager;
@@ -109,6 +110,18 @@ public class RpcAppRequestController
 					.session(ss)
 					.execute();
 				logger.trace("bad request command: {} with data: {} error", cmd, requestData);
+			}
+			catch (RpcHandleErrorException e) {
+				EzyArray responseData = marshaller
+						.marshal(((RpcHandleErrorException)e).getResponseData());
+				EzyArray commandData = EzyEntityFactory.newArray();
+				commandData.add(cmd, requestId, responseData);
+				ctx.cmd(EzyAppResponse.class)
+					.command("$e")
+					.params(commandData)
+					.session(ss)
+					.execute();
+				logger.trace("error when handle command: {} with data: {} error", cmd, requestData);
 			}
 			catch (Exception e) {
 				logger.warn("handle command: {} with data: {} error", cmd, requestData);

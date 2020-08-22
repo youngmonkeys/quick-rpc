@@ -16,8 +16,8 @@ import java.lang.annotation.Target;
 @Target({ ElementType.TYPE })
 public @interface RpcErrorData {
 	
-	String value() default "";
+	String[] value() default {};
 	
-	String command() default "";
+	String[] commands() default {};
 	
 }

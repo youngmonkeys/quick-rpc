@@ -4,7 +4,7 @@ import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
 import com.tvd12.quick.rpc.client.QuickRpcClient;
-import com.tvd12.quick.rpc.client.request.RpcRequest;
+import com.tvd12.quick.rpc.client.entity.RpcRequest;
 import com.tvd12.quick.rpc.client.test.data.GreetRequest;
 
 public class QuickRpcClientTest {
