@@ -10,7 +10,6 @@ import com.tvd12.ezyfox.asm.EzyInstruction;
 import com.tvd12.ezyfox.reflect.EzyClass;
 import com.tvd12.ezyfox.reflect.EzyMethod;
 import com.tvd12.ezyfox.reflect.EzyMethods;
-import com.tvd12.ezyfox.reflect.EzyReflections;
 import com.tvd12.ezyfox.util.EzyLoggable;
 import com.tvd12.quick.rpc.server.entity.RpcRequest;
 import com.tvd12.quick.rpc.server.entity.RpcResponse;
@@ -102,7 +101,8 @@ public class RpcRequestHandlerImplementer extends EzyLoggable {
 	
 	protected String makeHandleRequestMethodContent() {
 		EzyMethod method = getHandleRequestMethod();
-		EzyFunction function = new EzyFunction(method);
+		EzyFunction function = new EzyFunction(method)
+				.throwsException();
 		EzyBody body = function.body();
 		int paramCount = 0;
 		Class<?> requestDataType = handlerMethod.getRequestDataType();
@@ -149,7 +149,7 @@ public class RpcRequestHandlerImplementer extends EzyLoggable {
 		body.append(instruction);
 		if(returnType == void.class)
 			body.append(new EzyInstruction("\t", "\n").append("return null"));
-		return toThrowExceptionFunction(method, function);
+		return function.toString();
 	}
 	
 	protected String makeGetRequestDataTypeMethodContent() {
@@ -159,15 +159,6 @@ public class RpcRequestHandlerImplementer extends EzyLoggable {
 							.answer()
 							.clazz(handlerMethod.getRequestDataType(), true))
 					.function()
-				.toString();
-	}
-	
-	protected String toThrowExceptionFunction(EzyMethod method, EzyFunction function) {
-		return new StringBuilder()
-				.append(method.getDeclaration(EzyReflections.MODIFIER_PUBLIC))
-				.append(" throws Exception {\n")
-				.append(function.body())
-				.append("}")
 				.toString();
 	}
 	

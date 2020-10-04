@@ -5,6 +5,7 @@ import java.lang.reflect.Parameter;
 import com.tvd12.ezyfox.io.EzyStrings;
 import com.tvd12.ezyfox.reflect.EzyMethod;
 import com.tvd12.quick.rpc.server.annotation.Rpc;
+import com.tvd12.quick.rpc.server.annotation.RpcRequestData;
 import com.tvd12.quick.rpc.server.entity.RpcRequest;
 import com.tvd12.quick.rpc.server.entity.RpcSession;
 import com.tvd12.quick.rpc.server.entity.RpcResponse;
@@ -44,15 +45,18 @@ public class RpcRequestHandlerMethod {
 	}
 	
 	public Class<?> getRequestDataType() {
+		Class<?> dataType = null;
 		for(Parameter parameter : getParameters()) {
 			Class<?> type = parameter.getType();
 			if(type != RpcRequest.class &&
 					type != RpcResponse.class &&
 					type != RpcSession.class) {
-				return type;
+				dataType = type;
+				if(type.isAnnotationPresent(RpcRequestData.class))
+					break;
 			}
 		}
-		return null;
+		return dataType;
 	}
 	
 	@Override
