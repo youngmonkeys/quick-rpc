@@ -14,11 +14,20 @@ public abstract class RpcAsmAbstractRequestHandler implements RpcAsmRequestHandl
 	
 	@Override
 	public void handle(RpcRequest<Object> request, RpcResponse response) {
-		Object responseData = handleRequest(request, response);
-		if(responseData != null)
-			response.write(responseData);
+		try {
+			Object responseData = handleRequest(request, response);
+			if(responseData != null)
+				response.write(responseData);
+		}
+		catch (Exception e) {
+			handleException(request, response, e);
+		}
 	}
 	
-	protected abstract Object handleRequest(RpcRequest<Object> request, RpcResponse response);
+	protected abstract Object handleRequest(
+			RpcRequest<Object> request, RpcResponse response);
+	
+	protected abstract void handleException(
+			RpcRequest<Object> request, RpcResponse response, Exception exception);
 	
 }

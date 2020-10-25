@@ -1,5 +1,6 @@
 package com.tvd12.quick.rpc.server;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -38,10 +39,17 @@ import com.tvd12.ezyfoxserver.setting.EzySimpleZoneSetting;
 import com.tvd12.ezyfoxserver.setting.EzyUserManagementSettingBuilder;
 import com.tvd12.ezyfoxserver.setting.EzyZoneSettingBuilder;
 import com.tvd12.quick.rpc.server.annotation.RpcController;
+import com.tvd12.quick.rpc.server.annotation.RpcExceptionHandler;
 import com.tvd12.quick.rpc.server.annotation.RpcHandler;
+import com.tvd12.quick.rpc.server.annotation.RpcInterceptor;
+import com.tvd12.quick.rpc.server.asm.RpcExceptionHandlersImplementer;
 import com.tvd12.quick.rpc.server.asm.RpcRequestHandlersImplementer;
+import com.tvd12.quick.rpc.server.handler.RpcExceptionHandlers;
 import com.tvd12.quick.rpc.server.handler.RpcRequestHandler;
 import com.tvd12.quick.rpc.server.handler.RpcRequestHandlers;
+import com.tvd12.quick.rpc.server.handler.RpcRequestInterceptor;
+import com.tvd12.quick.rpc.server.handler.RpcRequestInterceptors;
+import com.tvd12.quick.rpc.server.handler.RpcUncaughtExceptionHandler;
 import com.tvd12.quick.rpc.server.manager.RpcComponentManager;
 import com.tvd12.quick.rpc.server.manager.RpcSessionManager;
 import com.tvd12.quick.rpc.server.setting.QuickRpcSettings;
@@ -58,11 +66,15 @@ public class QuickRpcServer extends EzyLoggable implements EzyStoppable {
 	protected final QuickRpcSettings settings;
 	protected final Set<String> packagesToScan;
 	protected final Map<String, RpcRequestHandler> requestHandlers;
+	protected final List<RpcRequestInterceptor> requestInterceptors;
+	protected final Map<Class<?>, RpcUncaughtExceptionHandler> exceptionHandlers;
 	
 	public QuickRpcServer(QuickRpcSettings settings) {
 		this.settings = settings;
 		this.packagesToScan = new HashSet<>();
 		this.requestHandlers = new HashMap<>();
+		this.exceptionHandlers = new HashMap<>();
+		this.requestInterceptors = new ArrayList<>();
 	}
 	
 	public QuickRpcServer scan(String packageToScan) {
@@ -95,6 +107,17 @@ public class QuickRpcServer extends EzyLoggable implements EzyStoppable {
 		return this;
 	}
 	
+	public QuickRpcServer addRequestInterceptor(RpcRequestInterceptor interceptor) {
+		this.requestInterceptors.add(interceptor);
+		return this;
+	}
+	
+	public QuickRpcServer addExceptionHandler(
+			Class<?> exceptionClass, RpcUncaughtExceptionHandler handler) {
+		this.exceptionHandlers.put(exceptionClass, handler);
+		return this;
+	}
+	
 	@SuppressWarnings("unchecked")
 	public RpcServerContext start() throws Exception {
 		EzyReflection reflection = null;
@@ -104,8 +127,11 @@ public class QuickRpcServer extends EzyLoggable implements EzyStoppable {
 		if(beanContext == null) {
 			EzyBeanContextBuilder builder = EzyBeanContext.builder();
 			if(reflection != null) {
-				builder.addSingletonClasses((Set)reflection.getAnnotatedClasses(RpcHandler.class))
+				builder
+					.addSingletonClasses((Set)reflection.getAnnotatedClasses(RpcHandler.class))
 					.addSingletonClasses((Set)reflection.getAnnotatedClasses(RpcController.class))
+					.addSingletonClasses((Set)reflection.getAnnotatedClasses(RpcExceptionHandler.class))
+					.addSingletonClasses((Set)reflection.getAnnotatedClasses(RpcInterceptor.class))
 					.addAllClasses(reflection)
 					.addSingleton("sessionManager", sessionManager);
 			}
@@ -119,13 +145,23 @@ public class QuickRpcServer extends EzyLoggable implements EzyStoppable {
 			bindingContext = builder.build();
 		}
 		List<Object> controllers = beanContext.getSingletons(RpcController.class);
-		RpcRequestHandlersImplementer implementer = new RpcRequestHandlersImplementer();
-		requestHandlers.putAll(implementer.implement(controllers));
-		requestHandlers.putAll(EzyMaps.newHashMap(
+		RpcRequestHandlersImplementer requestHandlersImplementer = new RpcRequestHandlersImplementer();
+		this.requestHandlers.putAll(requestHandlersImplementer.implement(controllers));
+		this.requestHandlers.putAll((Map)EzyMaps.newHashMap(
 				beanContext.getSingletons(RpcHandler.class), 
 				b -> RpcHandlerAnnotations.getCommand(b.getClass())));
 		RpcRequestHandlers requestHandlers = RpcRequestHandlers.builder()
-				.addHandlers(this.requestHandlers)
+				.addHandlers((Map)this.requestHandlers)
+				.build();
+		this.requestInterceptors.addAll(beanContext.getSingletons(RpcInterceptor.class));
+		RpcRequestInterceptors requestInterceptors = RpcRequestInterceptors.builder()
+				.addInteceptors((List)this.requestInterceptors)
+				.build();
+		List<Object> exceptionControllers = beanContext.getSingletons(RpcExceptionHandler.class);
+		RpcExceptionHandlersImplementer exceptionHandlersImplementer = new RpcExceptionHandlersImplementer();
+		this.exceptionHandlers.putAll(exceptionHandlersImplementer.implement(exceptionControllers));
+		RpcExceptionHandlers exceptionHandlers = RpcExceptionHandlers.builder()
+				.addHandlers((Map)this.exceptionHandlers)
 				.build();
 		RpcComponentManager componentManager = RpcComponentManager.getInstance();
 		componentManager.addComponent(EzyBeanContext.class, beanContext);
@@ -133,6 +169,8 @@ public class QuickRpcServer extends EzyLoggable implements EzyStoppable {
 		componentManager.addComponent(EzyUnmarshaller.class, bindingContext.newUnmarshaller());
 		componentManager.addComponent(RpcSessionManager.class, sessionManager);
 		componentManager.addComponent(RpcRequestHandlers.class, requestHandlers);
+		componentManager.addComponent(RpcExceptionHandlers.class, exceptionHandlers);
+		componentManager.addComponent(RpcRequestInterceptors.class, requestInterceptors);
 		RpcServerContext serverContext = new RpcServerContext();
 		componentManager.addComponent(RpcServerContext.class, serverContext);
 		
@@ -190,6 +228,8 @@ public class QuickRpcServer extends EzyLoggable implements EzyStoppable {
 	public String toString() {
 		return new StringBuilder()
 				.append("requestHandlers: ").append(requestHandlers)
+				.append("\nrequestIntercepters: ").append(requestInterceptors)
+				.append("\nexceptionHandlers: ").append(exceptionHandlers)
 				.toString();
 	}
 }

@@ -1,6 +1,7 @@
 package com.tvd12.quick.rpc.server.transport;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.tvd12.ezyfox.binding.EzyMarshaller;
@@ -18,8 +19,12 @@ import com.tvd12.quick.rpc.server.entity.RpcRequest;
 import com.tvd12.quick.rpc.server.entity.RpcResponse;
 import com.tvd12.quick.rpc.server.entity.RpcSession;
 import com.tvd12.quick.rpc.server.exception.RpcHandleErrorException;
+import com.tvd12.quick.rpc.server.handler.RpcExceptionHandlers;
 import com.tvd12.quick.rpc.server.handler.RpcRequestHandler;
 import com.tvd12.quick.rpc.server.handler.RpcRequestHandlers;
+import com.tvd12.quick.rpc.server.handler.RpcRequestInterceptor;
+import com.tvd12.quick.rpc.server.handler.RpcRequestInterceptors;
+import com.tvd12.quick.rpc.server.handler.RpcUncaughtExceptionHandler;
 import com.tvd12.quick.rpc.server.manager.RpcComponentManager;
 import com.tvd12.quick.rpc.server.manager.RpcSessionManager;
 
@@ -33,7 +38,10 @@ public class RpcAppRequestController
 	protected final RpcSessionManager sessionManager;
 	protected final RpcRequestHandlers requestHandlers;
 	protected final RpcComponentManager componentManager;
+	protected final List<Class<?>> handledExceptionClasses;
+	protected final List<RpcRequestInterceptor> requestInterceptors;
 	protected final Map<String, AppRequestHandler> appRequestHandlers;
+	protected final Map<Class<?>, RpcUncaughtExceptionHandler> exceptionHandlers;
 	
 	public RpcAppRequestController() {
 		this.componentManager = RpcComponentManager.getInstance();
@@ -41,6 +49,12 @@ public class RpcAppRequestController
 		this.unmarshaller = componentManager.getComponent(EzyUnmarshaller.class);
 		this.sessionManager = componentManager.getComponent(RpcSessionManager.class);
 		this.requestHandlers = componentManager.getComponent(RpcRequestHandlers.class);
+		this.requestInterceptors = componentManager.getComponent(RpcRequestInterceptors.class)
+				.getInterceptors();
+		this.exceptionHandlers = componentManager.getComponent(RpcExceptionHandlers.class)
+				.getHandlers();
+		this.handledExceptionClasses = componentManager.getComponent(RpcExceptionHandlers.class)
+				.getExceptionClasses();
 		this.appRequestHandlers = defaultAppRequestHandlers();
 	}
 	
@@ -97,37 +111,76 @@ public class RpcAppRequestController
 			RpcRequest rpcRequest = new RpcRequest<>(session, cmd, requestId, requestData);
 			RpcResponse rpcResponse = new RpcResponse(rpcRequest);
 			try {
+				preHandle(rpcRequest, rpcResponse);
 				requestHandler.handle(rpcRequest, rpcResponse);
-			}
-			catch (BadRequestException e) {
-				EzyArray responseData = EzyEntityFactory.newArray();
-				responseData.add(e.getCode(), e.getMessage());
-				EzyArray commandData = EzyEntityFactory.newArray();
-				commandData.add(cmd, requestId, responseData);
-				ctx.cmd(EzyAppResponse.class)
-					.command("$e")
-					.params(commandData)
-					.session(ss)
-					.execute();
-				logger.trace("bad request command: {} with data: {} error", cmd, requestData);
-			}
-			catch (RpcHandleErrorException e) {
-				EzyArray responseData = marshaller
-						.marshal(((RpcHandleErrorException)e).getResponseData());
-				EzyArray commandData = EzyEntityFactory.newArray();
-				commandData.add(cmd, requestId, responseData);
-				ctx.cmd(EzyAppResponse.class)
-					.command("$e")
-					.params(commandData)
-					.session(ss)
-					.execute();
-				logger.trace("error when handle command: {} with data: {} error", cmd, requestData);
+				postHandle(rpcRequest, rpcResponse);
 			}
 			catch (Exception e) {
-				logger.warn("handle command: {} with data: {} error", cmd, requestData);
+				postHandle(rpcRequest, rpcResponse, e);
+				if(e instanceof BadRequestException) {
+					BadRequestException ex = (BadRequestException)e;
+					EzyArray responseData = EzyEntityFactory.newArray();
+					responseData.add(ex.getCode(), ex.getMessage());
+					EzyArray commandData = EzyEntityFactory.newArray();
+					commandData.add(cmd, requestId, responseData);
+					ctx.cmd(EzyAppResponse.class)
+						.command("$e")
+						.params(commandData)
+						.session(ss)
+						.execute();
+					logger.trace("bad request command: {} with data: {} error", cmd, requestData);
+				}
+				else if(e instanceof RpcHandleErrorException) {
+					EzyArray responseData = marshaller
+							.marshal(((RpcHandleErrorException)e).getResponseData());
+					EzyArray commandData = EzyEntityFactory.newArray();
+					commandData.add(cmd, requestId, responseData);
+					ctx.cmd(EzyAppResponse.class)
+						.command("$e")
+						.params(commandData)
+						.session(ss)
+						.execute();
+					logger.trace("error when handle command: {} with data: {} error", cmd, requestData);
+				}
+				else {
+					try {
+						if(!handleException(rpcRequest, rpcResponse, e))
+							throw e;
+					}
+					catch (Exception ex) {
+						logger.warn("handle command: {} with data: {} error", cmd, requestData);
+					}
+				}
 			}
 		});
 		return handlers;
+	}
+	
+	private void preHandle(RpcRequest request, RpcResponse response) {
+		for(RpcRequestInterceptor interceptor : requestInterceptors)
+			interceptor.preHandle(request, response);
+	}
+	
+	private void postHandle(RpcRequest request, RpcResponse response) {
+		for(RpcRequestInterceptor interceptor : requestInterceptors)
+			interceptor.postHandle(request, response);
+	}
+	
+	private void postHandle(RpcRequest request, RpcResponse response, Exception e) {
+		for(RpcRequestInterceptor interceptor : requestInterceptors)
+			interceptor.postHandle(request, response, e);
+	}
+	
+	protected boolean handleException(
+			RpcRequest request, RpcResponse response, Exception e) throws Exception {
+		for(Class<?> exceptionClass : handledExceptionClasses) {
+			if(exceptionClass.isAssignableFrom(e.getClass())) {
+				RpcUncaughtExceptionHandler exceptionHandler = exceptionHandlers.get(exceptionClass);
+				exceptionHandler.handleException(request, response, e);
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	private static interface AppRequestHandler {

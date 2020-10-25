@@ -1,8 +1,11 @@
 package com.tvd12.quick.rpc.server.reflect;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.tvd12.ezyfox.core.annotation.EzyTryCatch;
 import com.tvd12.ezyfox.reflect.EzyClass;
 import com.tvd12.ezyfox.reflect.EzyMethod;
 import com.tvd12.quick.rpc.server.annotation.Rpc;
@@ -17,12 +20,16 @@ public class RpcControllerProxy {
 	protected final Object instance;
 	protected final String commandGroup;
 	protected final List<RpcRequestHandlerMethod> requestHandlerMethods;
+	protected final List<RpcExceptionHandlerMethod> exceptionHandlerMethods;
+	protected final Map<Class<?>, RpcExceptionHandlerMethod> exceptionHandlerMethodMap;
 	
 	public RpcControllerProxy(Object instance) {
 		this.instance = instance;
 		this.clazz = new EzyClass(instance.getClass());
 		this.commandGroup = getCommandGroup();
 		this.requestHandlerMethods = fetchRequestHandlerMethods();
+		this.exceptionHandlerMethods = fetchExceptionHandlerMethods();
+		this.exceptionHandlerMethodMap = fetchExceptionHandlerMethodMap();
 	}
 	
 	protected String getCommandGroup() {
@@ -38,6 +45,25 @@ public class RpcControllerProxy {
 			list.add(m);
 		}
 		return list;
+	}
+	
+	public List<RpcExceptionHandlerMethod> fetchExceptionHandlerMethods() {
+		List<RpcExceptionHandlerMethod> list = new ArrayList<>();
+		List<EzyMethod> methods = clazz.getMethods(m -> m.isAnnotated(EzyTryCatch.class));
+		for(EzyMethod method : methods) {
+			RpcExceptionHandlerMethod m = new RpcExceptionHandlerMethod(method);
+			list.add(m);
+		}
+		return list;
+	}
+	
+	protected final Map<Class<?>, RpcExceptionHandlerMethod> fetchExceptionHandlerMethodMap() {
+		Map<Class<?>, RpcExceptionHandlerMethod> answer = new HashMap<>();
+		for(RpcExceptionHandlerMethod m : exceptionHandlerMethods) {
+			for(Class<?> exceptionClass : m.getExceptionClasses())
+				answer.put(exceptionClass, m);
+		}
+		return answer;
 	}
 	
 	protected boolean isRequestHandlerMethod(EzyMethod method) {
