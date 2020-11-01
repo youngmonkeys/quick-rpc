@@ -8,7 +8,5 @@ public interface RpcUncaughtExceptionHandler<D> {
 	void handleException(
 			RpcRequest<D> request, RpcResponse response,
 			Exception exception) throws Exception;
-	
-	void setExceptionHandler(Object exceptionHandler);
 
 }

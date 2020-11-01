@@ -143,13 +143,19 @@ public class RpcAppRequestController
 					logger.trace("error when handle command: {} with data: {} error", cmd, requestData);
 				}
 				else {
-					try {
-						if(!handleException(rpcRequest, rpcResponse, e))
-							throw e;
+					Exception exception = e;
+					RpcUncaughtExceptionHandler exceptionHandler = getExceptionHandler(e.getClass());
+					if(exceptionHandler != null) {
+						try {
+							exceptionHandler.handleException(rpcRequest, rpcResponse, e);
+							exception = null;
+						}
+						catch (Exception ex) {
+							exception = ex;
+						}
 					}
-					catch (Exception ex) {
-						logger.warn("handle command: {} with data: {} error", cmd, requestData);
-					}
+					if(exception != null)
+						logger.warn("handle command: {} with data: {} error", cmd, requestData, exception);
 				}
 			}
 		});
@@ -171,16 +177,12 @@ public class RpcAppRequestController
 			interceptor.postHandle(request, response, e);
 	}
 	
-	protected boolean handleException(
-			RpcRequest request, RpcResponse response, Exception e) throws Exception {
-		for(Class<?> exceptionClass : handledExceptionClasses) {
-			if(exceptionClass.isAssignableFrom(e.getClass())) {
-				RpcUncaughtExceptionHandler exceptionHandler = exceptionHandlers.get(exceptionClass);
-				exceptionHandler.handleException(request, response, e);
-				return true;
-			}
+	protected RpcUncaughtExceptionHandler getExceptionHandler(Class<?> exceptionClass) {
+		for(Class<?> exc : handledExceptionClasses) {
+			if(exc.isAssignableFrom(exceptionClass))
+				return exceptionHandlers.get(exc);
 		}
-		return false;
+		return null;
 	}
 	
 	private static interface AppRequestHandler {

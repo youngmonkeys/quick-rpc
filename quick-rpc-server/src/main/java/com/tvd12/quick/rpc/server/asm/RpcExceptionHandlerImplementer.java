@@ -12,8 +12,6 @@ import com.tvd12.ezyfox.reflect.EzyMethod;
 import com.tvd12.ezyfox.reflect.EzyMethods;
 import com.tvd12.ezyfoxserver.context.EzyContext;
 import com.tvd12.ezyfoxserver.event.EzyUserSessionEvent;
-import com.tvd12.ezyfoxserver.support.handler.EzyAbstractUncaughtExceptionHandler;
-import com.tvd12.quick.rpc.server.handler.RpcAbstractUncaughtExceptionHandler;
 import com.tvd12.quick.rpc.server.handler.RpcUncaughtExceptionHandler;
 import com.tvd12.quick.rpc.server.reflect.RpcExceptionHandlerMethod;
 import com.tvd12.quick.rpc.server.reflect.RpcExceptionHandlerProxy;
@@ -68,12 +66,12 @@ public class RpcExceptionHandlerImplementer
 		implClass.addMethod(CtNewMethod.make(handleExceptionMethodContent, implClass));
 		Class answerClass = implClass.toClass();
 		implClass.detach();
-		RpcUncaughtExceptionHandler handler = (RpcUncaughtExceptionHandler) answerClass.newInstance();
+		RpcAsmUncaughtExceptionHandler handler = (RpcAsmUncaughtExceptionHandler) answerClass.newInstance();
 		setRepoComponent(handler);
 		return handler;
 	}
 	
-	protected void setRepoComponent(RpcUncaughtExceptionHandler handler) {
+	protected void setRepoComponent(RpcAsmUncaughtExceptionHandler handler) {
 		handler.setExceptionHandler(exceptionHandler.getInstance());
 	}
 	
@@ -135,20 +133,20 @@ public class RpcExceptionHandlerImplementer
 	
 	protected EzyMethod getSetExceptionHandlerMethod() {
 		Method method = EzyMethods.getMethod(
-				RpcAbstractUncaughtExceptionHandler.class, "setExceptionHandler", Object.class);
+				RpcAsmAbstractUncaughtExceptionHandler.class, "setExceptionHandler", Object.class);
 		return new EzyMethod(method);
 	}
 	
 	protected EzyMethod getHandleExceptionMethod() {
 		Method method = EzyMethods.getMethod(
-				EzyAbstractUncaughtExceptionHandler.class, 
+				RpcAsmAbstractUncaughtExceptionHandler.class, 
 				"handleException", 
 				EzyContext.class, EzyUserSessionEvent.class, String.class, Object.class, Exception.class);
 		return new EzyMethod(method);
 	}
 	
 	protected Class<?> getSuperClass() {
-		return RpcAbstractUncaughtExceptionHandler.class;
+		return RpcAsmAbstractUncaughtExceptionHandler.class;
 	}
 	
 	protected String getImplClassName() {
