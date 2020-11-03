@@ -1,7 +1,6 @@
 package com.tvd12.quick.rpc.server.asm;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -15,7 +14,6 @@ import com.tvd12.ezyfox.reflect.EzyMethod;
 import com.tvd12.ezyfox.reflect.EzyMethods;
 import com.tvd12.quick.rpc.server.entity.RpcRequest;
 import com.tvd12.quick.rpc.server.entity.RpcResponse;
-import com.tvd12.quick.rpc.server.entity.RpcSession;
 import com.tvd12.quick.rpc.server.reflect.RpcControllerProxy;
 import com.tvd12.quick.rpc.server.reflect.RpcExceptionHandlerMethod;
 import com.tvd12.quick.rpc.server.reflect.RpcRequestHandlerMethod;
@@ -110,31 +108,7 @@ public class RpcRequestHandlerImplementer
 		EzyFunction function = new EzyFunction(method)
 				.throwsException();
 		EzyBody body = function.body();
-		int paramCount = 0;
-		Class<?> requestDataType = handlerMethod.getRequestDataType();
-		Parameter[] parameters = handlerMethod.getParameters();
-		for(Parameter parameter : parameters) {
-			Class<?> parameterType = parameter.getType();
-			EzyInstruction instruction = new EzyInstruction("\t", "\n")
-					.clazz(parameterType)
-					.append(" ").append(PARAMETER_PREFIX).append(paramCount)
-					.equal();
-			if(parameterType == requestDataType) {
-				instruction.cast(requestDataType, "arg0.getData()");
-			}
-			else if(parameterType == RpcRequest.class) {
-				instruction.append("arg0");
-			}
-			else if(parameterType == RpcResponse.class) {
-				instruction.append("arg1");
-			}
-			else if(parameterType == RpcSession.class) {
-				instruction.append("arg0.getSession()");
-			}
-			body.append(instruction);
-			++ paramCount;
-			
-		}
+		int paramCount = prepareHandleMethodArguments(body);
 		EzyInstruction instruction = new EzyInstruction("\t", "\n");
 		Class<?> returnType = handlerMethod.getReturnType();
 		if(returnType != void.class)

@@ -22,8 +22,7 @@ public class RpcAbstractHandlerImplementer<H extends RpcHandlerMethod>
 		this.handlerMethod = handlerMethod;
 	}
 
-	protected int prepareHandleMethodArguments(
-			EzyBody body, boolean exceptionHandle) {
+	protected int prepareHandleMethodArguments(EzyBody body) {
 		int paramCount = 0;
 		Parameter[] parameters = handlerMethod.getParameters();
 		for(Parameter parameter : parameters) {
@@ -40,12 +39,6 @@ public class RpcAbstractHandlerImplementer<H extends RpcHandlerMethod>
 			}
 			else if(parameterType == RpcSession.class) {
 				instruction.append("arg0.getSession()");
-			}
-			else if(Throwable.class.isAssignableFrom(parameterType)) {
-				if(exceptionHandle)
-					continue;
-				else 
-					instruction.append("null");
 			}
 			else if(parameterType == boolean.class) {
 				instruction.append("false");
