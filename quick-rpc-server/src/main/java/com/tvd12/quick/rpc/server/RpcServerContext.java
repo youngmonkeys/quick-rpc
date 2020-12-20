@@ -14,8 +14,8 @@ public class RpcServerContext {
 	protected final RpcSessionManager sessionManager;
 	protected final RpcComponentManager componentManager;
 	
-	protected RpcServerContext() {
-		this.componentManager = RpcComponentManager.getInstance();
+	protected RpcServerContext(RpcComponentManager componentManager) {
+		this.componentManager = componentManager;
 		this.beanContext = componentManager.getComponent(EzyBeanContext.class);
 		this.sessionManager = componentManager.getComponent(RpcSessionManager.class);
 	}

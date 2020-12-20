@@ -24,6 +24,7 @@ public class RpcAbstractHandlerImplementer<H extends RpcHandlerMethod>
 
 	protected int prepareHandleMethodArguments(EzyBody body) {
 		int paramCount = 0;
+		Class<?> requestDataType = handlerMethod.getRequestDataType();
 		Parameter[] parameters = handlerMethod.getParameters();
 		for(Parameter parameter : parameters) {
 			Class<?> parameterType = parameter.getType();
@@ -31,7 +32,10 @@ public class RpcAbstractHandlerImplementer<H extends RpcHandlerMethod>
 					.clazz(parameterType)
 					.append(" ").append(PARAMETER_PREFIX).append(paramCount)
 					.equal();
-			if(parameterType == RpcRequest.class) {
+			if(parameterType == requestDataType) {
+				instruction.cast(requestDataType, "arg0.getData()");
+			}
+			else if(parameterType == RpcRequest.class) {
 				instruction.append("arg0");
 			}
 			else if(parameterType == RpcResponse.class) {

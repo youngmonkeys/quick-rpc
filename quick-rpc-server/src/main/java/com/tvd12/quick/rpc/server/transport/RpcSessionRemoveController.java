@@ -12,8 +12,8 @@ public class RpcSessionRemoveController
 	protected final RpcSessionManager sessionManager;
 	protected final RpcComponentManager componentManager;
 	
-	public RpcSessionRemoveController() {
-		this.componentManager = RpcComponentManager.getInstance();
+	public RpcSessionRemoveController(RpcComponentManager componentManager) {
+		this.componentManager = componentManager;
 		this.sessionManager = componentManager.getComponent(RpcSessionManager.class);
 	}
 	

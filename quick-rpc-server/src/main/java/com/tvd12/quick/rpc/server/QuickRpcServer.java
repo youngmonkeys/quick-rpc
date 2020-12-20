@@ -163,7 +163,7 @@ public class QuickRpcServer extends EzyLoggable implements EzyStoppable {
 		RpcExceptionHandlers exceptionHandlers = RpcExceptionHandlers.builder()
 				.addHandlers((Map)this.exceptionHandlers)
 				.build();
-		RpcComponentManager componentManager = RpcComponentManager.getInstance();
+		RpcComponentManager componentManager = new RpcComponentManager();
 		componentManager.addComponent(EzyBeanContext.class, beanContext);
 		componentManager.addComponent(EzyMarshaller.class, bindingContext.newMarshaller());
 		componentManager.addComponent(EzyUnmarshaller.class, bindingContext.newUnmarshaller());
@@ -171,7 +171,7 @@ public class QuickRpcServer extends EzyLoggable implements EzyStoppable {
 		componentManager.addComponent(RpcRequestHandlers.class, requestHandlers);
 		componentManager.addComponent(RpcExceptionHandlers.class, exceptionHandlers);
 		componentManager.addComponent(RpcRequestInterceptors.class, requestInterceptors);
-		RpcServerContext serverContext = new RpcServerContext();
+		RpcServerContext serverContext = new RpcServerContext(componentManager);
 		componentManager.addComponent(RpcServerContext.class, serverContext);
 		
 		EzySimpleAdminSetting adminSetting = new EzyAdminSettingBuilder()
@@ -185,6 +185,7 @@ public class QuickRpcServer extends EzyLoggable implements EzyStoppable {
 		EzySimpleAppSetting appSetting = new EzyAppSettingBuilder()
 				.name("rpc")
 				.entryLoader(RpcAppEntryLoader.class)
+				.entryLoaderArgs(new Object[] {componentManager})
 				.build();
 		EzySimpleUserManagementSetting userManagementSetting = new EzyUserManagementSettingBuilder()
 				.maxSessionPerUser(Integer.MAX_VALUE)

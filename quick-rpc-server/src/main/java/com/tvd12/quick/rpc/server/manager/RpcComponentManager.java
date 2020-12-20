@@ -6,14 +6,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class RpcComponentManager {
 
 	private final Map<Object, Object> components;
-	private final static RpcComponentManager INSTANCE = new RpcComponentManager();
 	
-	private RpcComponentManager() {
+	public RpcComponentManager() {
 		this.components = new ConcurrentHashMap<>();
-	}
-	
-	public static RpcComponentManager getInstance() {
-		return INSTANCE;
 	}
 	
 	public void addComponent(Object key, Object component) {

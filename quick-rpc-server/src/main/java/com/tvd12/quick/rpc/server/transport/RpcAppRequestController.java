@@ -43,8 +43,8 @@ public class RpcAppRequestController
 	protected final Map<String, AppRequestHandler> appRequestHandlers;
 	protected final Map<Class<?>, RpcUncaughtExceptionHandler> exceptionHandlers;
 	
-	public RpcAppRequestController() {
-		this.componentManager = RpcComponentManager.getInstance();
+	public RpcAppRequestController(RpcComponentManager componentManager) {
+		this.componentManager = componentManager;
 		this.marshaller = componentManager.getComponent(EzyMarshaller.class);
 		this.unmarshaller = componentManager.getComponent(EzyUnmarshaller.class);
 		this.sessionManager = componentManager.getComponent(RpcSessionManager.class);
