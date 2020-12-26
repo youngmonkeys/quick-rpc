@@ -34,10 +34,18 @@ import com.tvd12.ezyfoxserver.setting.EzySimpleAppSetting;
 import com.tvd12.ezyfoxserver.setting.EzySimplePluginSetting;
 import com.tvd12.ezyfoxserver.setting.EzySimpleSessionManagementSetting;
 import com.tvd12.ezyfoxserver.setting.EzySimpleSessionManagementSetting.EzySimpleMaxRequestPerSecond;
+import com.tvd12.ezyfoxserver.setting.EzySimpleSocketSetting;
+import com.tvd12.ezyfoxserver.setting.EzySimpleThreadPoolSizeSetting;
 import com.tvd12.ezyfoxserver.setting.EzySimpleUserManagementSetting;
+import com.tvd12.ezyfoxserver.setting.EzySimpleWebSocketSetting;
 import com.tvd12.ezyfoxserver.setting.EzySimpleZoneSetting;
+import com.tvd12.ezyfoxserver.setting.EzySocketSettingBuilder;
+import com.tvd12.ezyfoxserver.setting.EzyThreadPoolSizeSettingBuilder;
 import com.tvd12.ezyfoxserver.setting.EzyUserManagementSettingBuilder;
+import com.tvd12.ezyfoxserver.setting.EzyWebSocketSettingBuilder;
 import com.tvd12.ezyfoxserver.setting.EzyZoneSettingBuilder;
+import com.tvd12.quick.rpc.core.annotation.RpcRequest;
+import com.tvd12.quick.rpc.core.util.RpcRequestDataClasses;
 import com.tvd12.quick.rpc.server.annotation.RpcController;
 import com.tvd12.quick.rpc.server.annotation.RpcExceptionHandler;
 import com.tvd12.quick.rpc.server.annotation.RpcHandler;
@@ -102,8 +110,15 @@ public class QuickRpcServer extends EzyLoggable implements EzyStoppable {
 		return this;
 	}
 	
-	public QuickRpcServer addRequestHandler(String cmd, RpcRequestHandler handler) {
+	public <D> QuickRpcServer addRequestHandler(String cmd, RpcRequestHandler<D> handler) {
 		this.requestHandlers.put(cmd, handler);
+		return this;
+	}
+	
+	public <D> QuickRpcServer addRequestHandler(Class<D> requestDataClass, RpcRequestHandler<D> handler) {
+		for(String command : RpcRequestDataClasses.getCommands(requestDataClass)) {
+			addRequestHandler(command, handler);
+		}
 		return this;
 	}
 	
@@ -140,6 +155,12 @@ public class QuickRpcServer extends EzyLoggable implements EzyStoppable {
 		if(bindingContext == null) {
 			EzyBindingContextBuilder builder = EzyBindingContext.builder();
 			if(reflection != null) {
+				Set<Class<?>> requestDataClasses = reflection.getAnnotatedClasses(RpcRequest.class);
+				Set<Class<?>> responseDataClasses = reflection.getAnnotatedClasses(RpcRequest.class);
+				Set<Class<?>> errorDataClasses = reflection.getAnnotatedClasses(RpcRequest.class);
+				builder.addClasses((Set)requestDataClasses);
+				builder.addClasses((Set)responseDataClasses);
+				builder.addClasses((Set)errorDataClasses);
 				builder.addAllClasses(reflection);
 			}
 			bindingContext = builder.build();
@@ -174,6 +195,18 @@ public class QuickRpcServer extends EzyLoggable implements EzyStoppable {
 		RpcServerContext serverContext = new RpcServerContext(componentManager);
 		componentManager.addComponent(RpcServerContext.class, serverContext);
 		
+		EzySimpleSocketSetting socketSetting = new EzySocketSettingBuilder()
+				.address(settings.getHost())
+				.port(settings.getPort())
+				.build();
+		EzySimpleWebSocketSetting webSocketSetting = new EzyWebSocketSettingBuilder()
+				.active(false)
+				.build();
+		EzySimpleThreadPoolSizeSetting threadPoolSizeSetting = new EzyThreadPoolSizeSettingBuilder()
+				.socketUserRemovalHandler(1)
+				.socketDisconnectionHandler(1)
+				.systemRequestHandler(2)
+				.build();
 		EzySimpleAdminSetting adminSetting = new EzyAdminSettingBuilder()
 				.username(settings.getUsername())
 				.password(settings.getPassword())
@@ -204,15 +237,18 @@ public class QuickRpcServer extends EzyLoggable implements EzyStoppable {
 				.build();
 		EzySettings settings = new EzySettingsBuilder()
 				.nodeName("rpc")
+				.socket(socketSetting)
+				.websocket(webSocketSetting)
 				.admin(adminSetting)
 				.zone(zoneSetting)
 				.sessionManagement(sessionManagementSetting)
+				.threadPoolSize(threadPoolSizeSetting)
 				.build();
 		EzyConfig config = new EzyConfigBuilder()
 				.bannerFile("quick-rpc-banner.txt")
 				.build();
 		transporter = EzyEmbeddedServer.builder()
-				.config(config)
+				.config(config) 
 				.settings(settings)
 				.build();
 		transporter.start();

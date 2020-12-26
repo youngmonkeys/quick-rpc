@@ -1,18 +1,26 @@
 package com.tvd12.quick.rpc.client.exception;
 
+import com.tvd12.quick.rpc.client.entity.RpcError;
+
+import lombok.Getter;
+
 public class RpcErrorException extends RuntimeException {
 	private static final long serialVersionUID = 3710094643516024486L;
 	
-	protected final Object data;
+	@Getter
+	protected final RpcError error;
 	
-	public RpcErrorException(String cmd, String requestId, Object data) {
+	public RpcErrorException(
+			String cmd, 
+			String requestId, 
+			RpcError error
+	) {
 		super("rpc command: " + cmd + ", requestId: " + requestId + " error");
-		this.data = data;
+		this.error = error;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public <T> T getData() {
-		return (T)data;
+	public <T> T getErrorData(Class<T> dataType) {
+		return error.getData(dataType);
 	}
 
 }

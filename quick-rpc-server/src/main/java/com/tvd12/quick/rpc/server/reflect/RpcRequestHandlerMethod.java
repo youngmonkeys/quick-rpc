@@ -2,8 +2,7 @@ package com.tvd12.quick.rpc.server.reflect;
 
 import com.tvd12.ezyfox.io.EzyStrings;
 import com.tvd12.ezyfox.reflect.EzyMethod;
-import com.tvd12.quick.rpc.server.annotation.Rpc;
-import com.tvd12.quick.rpc.server.util.RpcAnnotations;
+import com.tvd12.quick.rpc.server.util.RpcAnnotatedMethods;
 
 import lombok.Getter;
 
@@ -18,7 +17,7 @@ public class RpcRequestHandlerMethod extends RpcHandlerMethod {
 	}
 	
 	protected String fetchCommand(String group) {
-		String methodCommand = RpcAnnotations.getCommand(method.getAnnotation(Rpc.class));
+		String methodCommand = RpcAnnotatedMethods.getCommand(method);
 		if(EzyStrings.isNoContent(group))
 			return methodCommand;
 		return group + "/" + methodCommand;

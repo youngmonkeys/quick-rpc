@@ -6,9 +6,15 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
 import com.tvd12.ezyfox.binding.EzyBindingContext;
@@ -43,8 +49,6 @@ import com.tvd12.ezyfoxserver.client.handler.EzyLoginSuccessHandler;
 import com.tvd12.ezyfoxserver.client.request.EzyAppAccessRequest;
 import com.tvd12.ezyfoxserver.client.request.EzyLoginRequest;
 import com.tvd12.ezyfoxserver.client.request.EzyRequest;
-import com.tvd12.quick.rpc.client.annotation.RpcErrorData;
-import com.tvd12.quick.rpc.client.annotation.RpcResponseData;
 import com.tvd12.quick.rpc.client.callback.RpcCallback;
 import com.tvd12.quick.rpc.client.constant.RpcClientType;
 import com.tvd12.quick.rpc.client.entity.RpcRequest;
@@ -54,8 +58,8 @@ import com.tvd12.quick.rpc.client.exception.RpcClientMaxCapacityException;
 import com.tvd12.quick.rpc.client.exception.RpcClientNotConnectedException;
 import com.tvd12.quick.rpc.client.exception.RpcErrorException;
 import com.tvd12.quick.rpc.client.net.RpcSocketAddress;
-import com.tvd12.quick.rpc.client.util.RpcErrorDataAnnotations;
-import com.tvd12.quick.rpc.client.util.RpcResponseDataAnnotations;
+import com.tvd12.quick.rpc.core.util.RpcRequestDataClasses;
+import com.tvd12.quick.rpc.core.util.RpcResponseDataClasses;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
@@ -72,10 +76,11 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 	protected final EzyMarshaller marshaller;
 	protected final EzyUnmarshaller unmarshaller;
 	protected final EzyBindingContext bindingContext;
-	protected final Map<String, Class> errorTypes;
 	protected final Map<String, Class> responseTypes;
+	protected final Map<Class, String> requestCommands;
 	protected final Consumer<EzyArray> messageSender;
 	protected final LinkedList<EzyClient> transporters;
+	protected final RpcRequestIdGenerator requestIdGenerator;
 	protected final Map<String, EzyFutureMap<String>> futureMap;
 	protected final LinkedList<RpcSocketAddress> serverAddresses;
 
@@ -94,32 +99,56 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 		this.bindingContext = builder.bindingContext;
 		this.marshaller = bindingContext.newMarshaller();
 		this.unmarshaller = bindingContext.newUnmarshaller();
-		this.errorTypes = new HashMap<>(builder.errorTypes);
+		this.requestCommands = new HashMap<>(builder.requestCommands);
 		this.responseTypes = new HashMap<>(builder.responseTypes);
 		this.serverAddresses = new LinkedList<>(builder.serverAddresses);
+		this.requestIdGenerator = new RpcRequestIdGenerator();
 		this.connect();
 		this.messageSender = newMessageSender();
 	}
 
 	public void fire(RpcRequest request) {
+		fire(request, getRequestId(request));
+	}
+	
+	protected void fire(RpcRequest request, String requestId) {
 		EzyArray commandData = EzyEntityFactory.newArray();
 		Object mdata = marshaller.marshal(request.getData());
-		commandData.add(request.getCommand(), request.getId(), mdata);
+		commandData.add(request.getCommand(), requestId, mdata);
 		EzyArray sdata = EzyEntityFactory.newArray();
 		sdata.add("$r", commandData);
 		messageSender.accept(sdata);
 	}
 	
-	public <T> T call(RpcRequest request) throws Exception {
+	public <T> T call(
+			RpcRequest request, 
+			Class<T> responseDataType) throws Exception {
+		return call(request, responseDataType, -1);
+	}
+	
+	public <T> T call(
+			RpcRequest request, 
+			Class<T> responseDataType, int timeout) throws Exception {
+		RpcResponse response = call(request, timeout);
+		if(response.isError()) {
+			throw new RpcErrorException(
+					response.getCommand(), 
+					response.getRequestId(), response);
+		}
+		return getResponseData(response);
+	}
+	
+	public RpcResponse call(RpcRequest request) throws Exception {
 		return call(request, -1);
 	}
 	
-	public <T> T call(RpcRequest request, int timeout) throws Exception {
+	public RpcResponse call(RpcRequest request, int timeout) throws Exception {
 		if(remainRequest.get() >= capacity)
 			throw new RpcClientMaxCapacityException(capacity);
 		EzyFutureMap<String> futures = getFutures(request.getCommand());
-		EzyFuture future = futures.addFuture(request.getId());
-		fire(request);
+		String requestId = getRequestId(request);
+		EzyFuture future = futures.addFuture(requestId);
+		fire(request, requestId);
 		RpcResponse response;
 		try {
 			response = future.get(timeout);
@@ -128,36 +157,64 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 			futures.removeFuture(request.getCommand());
 			throw e;
 		}
-		Object responseData = 
-				deserializeResponse(response.getCommand(), response);
-		if(response.isError()) {
-			throw new RpcErrorException(
-					response.getCommand(), 
-					response.getRequestId(), responseData);
-		}
-		return (T)responseData;
+		return response;
 	}
 	
-	public <R,E> void execute(RpcRequest request, RpcCallback<R,E> callback) {
+	public <R> void execute(RpcRequest request, RpcCallback<R> callback) {
 		if(remainRequest.get() >= capacity)
 			throw new RpcClientMaxCapacityException(capacity);
 		EzyFutureMap<String> futures = getFutures(request.getCommand());
-		futures.addFuture(request.getId(), 
+		String requestId = getRequestId(request);
+		futures.addFuture(requestId, 
 				new EzyCallableFutureTask(new EzyResultCallback<RpcResponse>() {
 			@Override
 			public void onResponse(RpcResponse response) {
-				Object data = deserializeResponse(response.getCommand(), response);
 				if(response.isError())
-					callback.onError((E)data);
+					callback.onError(response);
 				else
-					callback.onSuccess((R)response);
+					callback.onSuccess(getResponseData(response));
 			}
 			@Override
 			public void onException(Exception e) {
 				callback.onFailed(e);
 			}
 		}));
-		fire(request);
+		fire(request, requestId);
+	}
+	
+	
+	
+	public Future<RpcResponse> submit(RpcRequest request) {
+		if(remainRequest.get() >= capacity)
+			throw new RpcClientMaxCapacityException(capacity);
+		EzyFutureMap<String> futures = getFutures(request.getCommand());
+		String requestId = getRequestId(request);
+		EzyFuture future = futures.addFuture(requestId);
+		fire(request, requestId);
+		return new FutureTask<RpcResponse>(new Callable<RpcResponse>() {
+			@Override
+			public RpcResponse call() throws Exception {
+				return future.get();
+			}
+		}) {
+			@Override
+			public RpcResponse get(long timeout, TimeUnit unit)
+			        throws InterruptedException, ExecutionException, TimeoutException {
+				try {
+					return super.get(timeout, unit);
+				}
+				catch (TimeoutException e) {
+					futures.removeFuture(request.getCommand());
+					throw e;
+				}
+			}
+		};
+	}
+	
+	private String getRequestId(RpcRequest request) {
+		if(request.getId() != null)
+			return request.getId();
+		return requestIdGenerator.generate(request.getCommand());
 	}
 	
 	private EzyFutureMap<String> getFutures(String requestCommand) {
@@ -165,13 +222,11 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 				requestCommand, k -> new EzyFutureConcurrentHashMap<>());
 	}
 	
-	private Object deserializeResponse(String cmd, RpcResponse response) {
-		Class<?> dataType = response.isError() 
-				? errorTypes.get(cmd)
-				: responseTypes.get(cmd);
+	private <T> T getResponseData(RpcResponse response) {
+		Class<?> dataType = responseTypes.get(response.getCommand());
 		if(dataType == null)
-			return response.getData();
-		return unmarshaller.unmarshal(response.getData(), dataType);
+			return (T)response.getRawData();
+		return (T)response.getData(dataType);
 	}
 	
 	@Override
@@ -319,7 +374,7 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 						return;
 					}
 					EzyData result = data.get(2, EzyData.class);
-					future.setResult(new RpcResponse(cmd, id, result, false));
+					future.setResult(new RpcResponse(unmarshaller, cmd, id, result, false));
 				}
 			})
 			.addDataHandler("$e", new EzyAppDataHandler<EzyArray>() {
@@ -338,7 +393,7 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 						return;
 					}
 					EzyData error = data.get(2, EzyData.class);
-					future.setResult(new RpcResponse(cmd, id, error, false));
+					future.setResult(new RpcResponse(unmarshaller, cmd, id, error, true));
 				}
 			});
 		return transporter;
@@ -360,6 +415,7 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 		protected Set<String> packagesToScan = new HashSet<>();
 		protected Map<String, Class> errorTypes = new HashMap<>();
 		protected Map<String, Class> responseTypes = new HashMap<>();
+		protected Map<Class, String> requestCommands = new HashMap<>();
 		protected RpcClientType clientType = RpcClientType.SINGLE;
 		protected LinkedList<RpcSocketAddress> serverAddresses = new LinkedList<>();
 	
@@ -449,21 +505,37 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 			if(packagesToScan.size() > 0)
 				reflection = new EzyReflectionProxy(packagesToScan);
 			if(reflection != null) {
-				for(Class<?> cls : reflection.getAnnotatedClasses(RpcResponseData.class)) {
-					for(String cmd : RpcResponseDataAnnotations.getCommands(cls))
-						responseTypes.put(cmd, cls);
+				Set<Class<?>> requestDataClasses = reflection.getAnnotatedClasses(
+						com.tvd12.quick.rpc.core.annotation.RpcRequest.class);
+				Set<Class<?>> responseDataClasses = reflection.getAnnotatedClasses(
+						com.tvd12.quick.rpc.core.annotation.RpcRequest.class);
+				for(Class<?> cls : requestDataClasses) {
+					for(String cmd : RpcRequestDataClasses.getCommands(cls)) {
+						requestCommands.put(cls, cmd);
+					}
 				}
-				for(Class<?> cls : reflection.getAnnotatedClasses(RpcErrorData.class)) {
-					for(String cmd : RpcErrorDataAnnotations.getCommands(cls))
-						errorTypes.put(cmd, cls);
+				for(Class<?> cls : responseDataClasses) {
+					for(String cmd : RpcResponseDataClasses.getCommands(cls)) {
+						responseTypes.put(cmd, cls);
+					}
 				}
 			}
 			if(bindingContext == null) {
 				EzyBindingContextBuilder builder = EzyBindingContext.builder()
 					.addClasses(responseTypes.values())
 					.addClasses(errorTypes.values());
-				if(reflection != null)
+				if(reflection != null) {
+					Set<Class<?>> requestDataClasses = reflection.getAnnotatedClasses(
+							com.tvd12.quick.rpc.core.annotation.RpcRequest.class);
+					Set<Class<?>> responseDataClasses = reflection.getAnnotatedClasses(
+							com.tvd12.quick.rpc.core.annotation.RpcRequest.class);
+					Set<Class<?>> errorDataClasses = reflection.getAnnotatedClasses(
+							com.tvd12.quick.rpc.core.annotation.RpcRequest.class);
+					builder.addClasses((Set)requestDataClasses);
+					builder.addClasses((Set)responseDataClasses);
+					builder.addClasses((Set)errorDataClasses);
 					builder.addAllClasses(reflection);
+				}
 				bindingContext = builder.build();
 			}
 			if(serverAddresses.isEmpty())
@@ -471,6 +543,16 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 			return new QuickRpcClient(this);
 		}
 	
+	}
+	
+	private static class RpcRequestIdGenerator {
+		
+		private final AtomicLong incrementer = new AtomicLong();
+		
+		public String generate(String requestCommand) {
+			return Long.toString(incrementer.incrementAndGet(), Character.MAX_RADIX);
+		}
+		
 	}
 
 }

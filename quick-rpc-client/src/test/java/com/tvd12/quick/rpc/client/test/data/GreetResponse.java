@@ -1,13 +1,13 @@
 package com.tvd12.quick.rpc.client.test.data;
 
-import com.tvd12.quick.rpc.client.annotation.RpcResponseData;
+import com.tvd12.quick.rpc.core.annotation.RpcRequest;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-@RpcResponseData("Greet")
+@RpcRequest("Greet")
 public class GreetResponse {
 
 	protected String message;

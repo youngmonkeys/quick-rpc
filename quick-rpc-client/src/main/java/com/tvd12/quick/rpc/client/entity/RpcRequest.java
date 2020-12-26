@@ -15,6 +15,14 @@ public class RpcRequest {
 	
 	public static final RpcRequest POISON = new RpcRequest(null, null, null);
 	
+	public RpcRequest(Object data) {
+		this(null, data);
+	}
+	
+	public RpcRequest(String command, Object data) {
+		this(command, null, data);
+	}
+	
 	public RpcRequest(String command, String id, Object data) {
 		this.id = id;
 		this.data = data;

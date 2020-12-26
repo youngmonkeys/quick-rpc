@@ -1,4 +1,4 @@
-package com.tvd12.quick.rpc.client.annotation;
+package com.tvd12.quick.rpc.core.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -14,10 +14,5 @@ import java.lang.annotation.Target;
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })
-public @interface RpcResponseData {
-	
-	String[] value() default "";
-	
-	String[] commands() default "";
-	
+public @interface RpcError {	
 }
