@@ -255,7 +255,7 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 	
 	private String getRequestCommand(RpcRequest request) {
 		String command = request.getCommand();
-		if(command != null)
+		if(command == null)
 			command = commands.get(request.getDataType());
 		if(command == null) {
 			command = commands.computeIfAbsent(

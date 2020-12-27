@@ -21,7 +21,7 @@ public class QuickRpcClientTest {
 				.build();
 		System.out.println("response 1: " + client.call(request1));
 //		Thread.sleep(20000);
-		Thread[] threads = new Thread[1];
+		Thread[] threads = new Thread[1000];
 		RpcRequest[] requests = new RpcRequest[threads.length];
 		for(int i = 0 ; i < threads.length ; ++i) {
 			requests[i] = RpcRequest.builder()
