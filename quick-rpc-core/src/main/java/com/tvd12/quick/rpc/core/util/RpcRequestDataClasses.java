@@ -1,8 +1,7 @@
 package com.tvd12.quick.rpc.core.util;
 
-import java.util.Set;
-
-import com.tvd12.ezyfox.collect.Sets;
+import com.tvd12.ezyfox.io.EzyStrings;
+import com.tvd12.ezyfox.reflect.EzyClasses;
 import com.tvd12.quick.rpc.core.annotation.RpcRequest;
 
 public final class RpcRequestDataClasses {
@@ -11,17 +10,14 @@ public final class RpcRequestDataClasses {
 
 	private RpcRequestDataClasses() {}
 	
-	public static Set<String> getCommands(Class<?> requestClass) {
+	public static String getCommand(Class<?> requestClass) {
+		String command = null;
 		RpcRequest ann = requestClass.getAnnotation(RpcRequest.class);
 		if(ann != null)
-			return RpcRequestAnnotations.getCommands(ann);
-		String className = requestClass.getSimpleName();
-		if(className.equals(REQUEST_SUFFIX) ||
-				!className.endsWith(REQUEST_SUFFIX))
-			return Sets.newHashSet(className);
-		return Sets.newHashSet(className.substring(
-				0, className.length() - REQUEST_SUFFIX.length()));
-		
+			command = RpcRequestAnnotations.getCommand(ann);
+		if(EzyStrings.isNoContent(command))
+			command = EzyClasses.getVariableName(requestClass, REQUEST_SUFFIX);
+		return command;
 	}
 	
 }

@@ -19,7 +19,7 @@ public class QuickRpcServerTest {
 		server.start();
 		System.out.println(server);
 		Thread.sleep(1000L);
-		server.stop();
+//		server.stop();
 	}
 	
 }

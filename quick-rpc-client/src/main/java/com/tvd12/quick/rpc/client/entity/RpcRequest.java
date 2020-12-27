@@ -29,6 +29,10 @@ public class RpcRequest {
 		this.command = command;
 	}
 	
+	public Class<?> getDataType() {
+		return data.getClass();
+	}
+	
 	@Override
 	public boolean equals(Object obj) {
 		return new EzyEquals<RpcRequest>()

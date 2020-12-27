@@ -15,11 +15,4 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })
 public @interface RpcResponse {
-	
-	String[] value() default "";
-	
-	String[] commands() default "";
-	
-	Class<?>[] requests() default Object.class;
-	
 }

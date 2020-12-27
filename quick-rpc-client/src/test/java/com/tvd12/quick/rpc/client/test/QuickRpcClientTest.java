@@ -49,7 +49,7 @@ public class QuickRpcClientTest {
 		cd.await();
 		long offset = System.currentTimeMillis() - start;
 		System.out.println("elapsed: " + offset);
-//		client.close();
+		client.close();
 	}
 	
 }

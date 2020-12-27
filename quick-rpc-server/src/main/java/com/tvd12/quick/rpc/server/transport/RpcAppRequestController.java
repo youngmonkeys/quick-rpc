@@ -15,6 +15,7 @@ import com.tvd12.ezyfoxserver.command.EzyAppResponse;
 import com.tvd12.ezyfoxserver.context.EzyAppContext;
 import com.tvd12.ezyfoxserver.entity.EzySession;
 import com.tvd12.ezyfoxserver.event.EzyUserRequestAppEvent;
+import com.tvd12.quick.rpc.core.constant.RpcInternalCommands;
 import com.tvd12.quick.rpc.server.entity.RpcRequest;
 import com.tvd12.quick.rpc.server.entity.RpcResponse;
 import com.tvd12.quick.rpc.server.entity.RpcSession;
@@ -77,15 +78,15 @@ public class RpcAppRequestController
 	
 	private Map<String, AppRequestHandler> defaultAppRequestHandlers() {
 		Map<String, AppRequestHandler> handlers = new HashMap<>();
-		handlers.put("$c", (ctx, ss, d) -> {
+		handlers.put(RpcInternalCommands.CONFIRM_CONNECTED, (ctx, ss, d) -> {
 			RpcSession session = new RpcSession(ctx, ss, marshaller);
 			sessionManager.addSession(session);
 			ctx.cmd(EzyAppResponse.class)
-				.command("$c")
+				.command(RpcInternalCommands.CONFIRM_CONNECTED)
 				.session(ss)
 				.execute();
 		});
-		handlers.put("$r", (ctx, ss, d) -> {
+		handlers.put(RpcInternalCommands.REQUEST, (ctx, ss, d) -> {
 			String cmd = d.get(0, String.class);
 			String requestId = d.get(1, String.class);
 			if(requestId == null) {
@@ -124,11 +125,11 @@ public class RpcAppRequestController
 					EzyArray commandData = EzyEntityFactory.newArray();
 					commandData.add(cmd, requestId, responseData);
 					ctx.cmd(EzyAppResponse.class)
-						.command("$e")
+						.command(RpcInternalCommands.ERROR)
 						.params(commandData)
 						.session(ss)
 						.execute();
-					logger.trace("bad request command: {} with data: {} error", cmd, requestData);
+					logger.debug("bad request command: {} with data: {} error", cmd, requestData, e);
 				}
 				else if(e instanceof RpcHandleErrorException) {
 					EzyArray responseData = marshaller
@@ -136,11 +137,11 @@ public class RpcAppRequestController
 					EzyArray commandData = EzyEntityFactory.newArray();
 					commandData.add(cmd, requestId, responseData);
 					ctx.cmd(EzyAppResponse.class)
-						.command("$e")
+						.command(RpcInternalCommands.ERROR)
 						.params(commandData)
 						.session(ss)
 						.execute();
-					logger.trace("error when handle command: {} with data: {} error", cmd, requestData);
+					logger.debug("error when handle command: {} with data: {} error", cmd, requestData, e);
 				}
 				else {
 					Exception exception = e;

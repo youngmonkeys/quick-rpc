@@ -43,5 +43,6 @@
   <modules>
     <module>quick-rpc-server</module>
     <module>quick-rpc-client</module>
+    <module>quick-rpc-core</module>
   </modules>
 </project>

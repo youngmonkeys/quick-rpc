@@ -44,7 +44,9 @@ import com.tvd12.ezyfoxserver.setting.EzyThreadPoolSizeSettingBuilder;
 import com.tvd12.ezyfoxserver.setting.EzyUserManagementSettingBuilder;
 import com.tvd12.ezyfoxserver.setting.EzyWebSocketSettingBuilder;
 import com.tvd12.ezyfoxserver.setting.EzyZoneSettingBuilder;
+import com.tvd12.quick.rpc.core.annotation.RpcError;
 import com.tvd12.quick.rpc.core.annotation.RpcRequest;
+import com.tvd12.quick.rpc.core.annotation.RpcResponse;
 import com.tvd12.quick.rpc.core.util.RpcRequestDataClasses;
 import com.tvd12.quick.rpc.server.annotation.RpcController;
 import com.tvd12.quick.rpc.server.annotation.RpcExceptionHandler;
@@ -116,10 +118,7 @@ public class QuickRpcServer extends EzyLoggable implements EzyStoppable {
 	}
 	
 	public <D> QuickRpcServer addRequestHandler(Class<D> requestDataClass, RpcRequestHandler<D> handler) {
-		for(String command : RpcRequestDataClasses.getCommands(requestDataClass)) {
-			addRequestHandler(command, handler);
-		}
-		return this;
+		return addRequestHandler(RpcRequestDataClasses.getCommand(requestDataClass), handler);
 	}
 	
 	public QuickRpcServer addRequestInterceptor(RpcRequestInterceptor interceptor) {
@@ -156,8 +155,8 @@ public class QuickRpcServer extends EzyLoggable implements EzyStoppable {
 			EzyBindingContextBuilder builder = EzyBindingContext.builder();
 			if(reflection != null) {
 				Set<Class<?>> requestDataClasses = reflection.getAnnotatedClasses(RpcRequest.class);
-				Set<Class<?>> responseDataClasses = reflection.getAnnotatedClasses(RpcRequest.class);
-				Set<Class<?>> errorDataClasses = reflection.getAnnotatedClasses(RpcRequest.class);
+				Set<Class<?>> responseDataClasses = reflection.getAnnotatedClasses(RpcResponse.class);
+				Set<Class<?>> errorDataClasses = reflection.getAnnotatedClasses(RpcError.class);
 				builder.addClasses((Set)requestDataClasses);
 				builder.addClasses((Set)responseDataClasses);
 				builder.addClasses((Set)errorDataClasses);

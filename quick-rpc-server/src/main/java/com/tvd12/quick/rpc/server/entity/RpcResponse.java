@@ -17,6 +17,11 @@ public class RpcResponse {
 		session.send(request.getCommand(), request.getId(), data);
 	}
 	
+	public void writeError(Object data) {
+		RpcSession session = request.getSession();
+		session.sendError(request.getCommand(), request.getId(), data);
+	}
+	
 	public RpcSession getSession() {
 		return request.getSession();
 	}

@@ -16,8 +16,8 @@ import java.lang.annotation.Target;
 @Target({ ElementType.TYPE })
 public @interface RpcRequest {
 	
-	String[] value() default "";
+	String value() default "";
 	
-	String[] commands() default "";
+	String command() default "";
 	
 }
