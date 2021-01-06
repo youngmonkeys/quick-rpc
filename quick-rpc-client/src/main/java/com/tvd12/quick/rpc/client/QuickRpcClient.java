@@ -67,6 +67,7 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 	protected volatile boolean active;
 	protected final int threadPoolSize;
 	protected final int processEventInterval;
+	protected final int defaultRequestTimeout;
 	protected final RpcClientType clientType;
 	protected final AtomicInteger remainRequest;
 	protected final EzyMarshaller marshaller;
@@ -88,6 +89,7 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 		this.clientType = builder.clientType;
 		this.threadPoolSize = builder.threadPoolSize;
 		this.processEventInterval = builder.processEventInterval;
+		this.defaultRequestTimeout = builder.defaultRequestTimeout;
 		this.futureMap = new ConcurrentHashMap<>();
 		this.remainRequest = new AtomicInteger();
 		this.transporters = new LinkedList<>();
@@ -141,7 +143,7 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 	}
 	
 	public RpcResponse call(RpcRequest request) throws Exception {
-		return call(request, -1);
+		return call(request, defaultRequestTimeout);
 	}
 	
 	public RpcResponse call(Object requestData, int timeout) throws Exception {
@@ -460,6 +462,7 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 		protected String password = "admin";
 		protected int threadPoolSize = 8;
 		protected int processEventInterval = 3;
+		protected int defaultRequestTimeout = 5000;
 		protected EzyBindingContext bindingContext;
 		protected Set<String> packagesToScan = new HashSet<>();
 		protected Map<Class, String> commands = new HashMap<>();
@@ -503,6 +506,11 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 		
 		public Builder clientType(RpcClientType clientType) {
 			this.clientType = clientType;
+			return this;
+		}
+		
+		public Builder defaultRequestTimeout(int defaultRequestTimeout) {
+			this.defaultRequestTimeout = defaultRequestTimeout;
 			return this;
 		}
 		
