@@ -47,6 +47,7 @@ import com.tvd12.ezyfoxserver.setting.EzyZoneSettingBuilder;
 import com.tvd12.quick.rpc.core.annotation.RpcError;
 import com.tvd12.quick.rpc.core.annotation.RpcRequest;
 import com.tvd12.quick.rpc.core.annotation.RpcResponse;
+import com.tvd12.quick.rpc.core.data.RpcBadRequestErrorData;
 import com.tvd12.quick.rpc.core.util.RpcRequestDataClasses;
 import com.tvd12.quick.rpc.server.annotation.RpcController;
 import com.tvd12.quick.rpc.server.annotation.RpcExceptionHandler;
@@ -152,7 +153,8 @@ public class QuickRpcServer extends EzyLoggable implements EzyStoppable {
 			beanContext = builder.build();
 		}
 		if(bindingContext == null) {
-			EzyBindingContextBuilder builder = EzyBindingContext.builder();
+			EzyBindingContextBuilder builder = EzyBindingContext.builder()
+					.addArrayBindingClass(RpcBadRequestErrorData.class);
 			if(reflection != null) {
 				Set<Class<?>> requestDataClasses = reflection.getAnnotatedClasses(RpcRequest.class);
 				Set<Class<?>> responseDataClasses = reflection.getAnnotatedClasses(RpcResponse.class);

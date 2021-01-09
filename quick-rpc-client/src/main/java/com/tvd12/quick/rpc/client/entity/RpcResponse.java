@@ -18,9 +18,13 @@ public class RpcResponse implements RpcError {
 	protected final EzyData rawData;
 	protected final boolean error;
 	
-	@Override
 	public <T> T getData(Class<T> dataType) {
 		return unmarshaller.unmarshal(rawData, dataType);
+	}
+	
+	@Override
+	public <T> T getErrorData(Class<T> dataType) {
+		return getData(dataType);
 	}
 	
 }

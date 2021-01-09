@@ -53,6 +53,7 @@ import com.tvd12.quick.rpc.client.exception.RpcClientNotConnectedException;
 import com.tvd12.quick.rpc.client.exception.RpcErrorException;
 import com.tvd12.quick.rpc.client.net.RpcSocketAddress;
 import com.tvd12.quick.rpc.core.constant.RpcInternalCommands;
+import com.tvd12.quick.rpc.core.data.RpcBadRequestErrorData;
 import com.tvd12.quick.rpc.core.util.RpcRequestDataClasses;
 
 import lombok.AllArgsConstructor;
@@ -103,6 +104,10 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 		this.messageSender = newMessageSender();
 	}
 
+	public void fire(Object requestData) {
+		fire(new RpcRequest(requestData));
+	}
+	
 	public void fire(RpcRequest request) {
 		String command = getRequestCommand(request);
 		internalFire(command, getRequestId(request, command), request.getData());
@@ -111,13 +116,13 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 	public <T> T call(
 			Object requestData, 
 			Class<T> responseDataType) throws Exception {
-		return call(new RpcRequest(requestData), responseDataType, -1);
+		return call(new RpcRequest(requestData), responseDataType, defaultRequestTimeout);
 	}
 	
 	public <T> T call(
 			RpcRequest request, 
 			Class<T> responseDataType) throws Exception {
-		return call(request, responseDataType, -1);
+		return call(request, responseDataType, defaultRequestTimeout);
 	}
 	
 	public <T> T call(
@@ -185,7 +190,6 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 				return getFutures(command);
 			}
 			
-			@Override
 			protected RpcResponse processResponse(RpcResponse response) throws ExecutionException {
 				return response;
 			}
@@ -355,7 +359,7 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 					.maxReconnectCount(Integer.MAX_VALUE)
 					.done()
 				.build();
-		EzyClient transporter = new EzyTcpClient(clientConfig);
+		EzyClient transporter = newSocketClient(clientConfig);
 		transporter.setup()
 			.addDataHandler(EzyCommand.HANDSHAKE, new EzyHandshakeHandler() {
 				@Override
@@ -427,6 +431,10 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 				}
 			});
 		return transporter;
+	}
+	
+	protected EzyClient newSocketClient(EzyClientConfig clientConfig) {
+		return new EzyTcpClient(clientConfig);
 	}
 	
 	public static Builder builder() {
@@ -525,7 +533,8 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 					commands.put(cls, RpcRequestDataClasses.getCommand(cls));
 			}
 			if(bindingContext == null) {
-				EzyBindingContextBuilder builder = EzyBindingContext.builder();
+				EzyBindingContextBuilder builder = EzyBindingContext.builder()
+						.addArrayBindingClass(RpcBadRequestErrorData.class);
 				if(reflection != null) {
 					Set<Class<?>> requestDataClasses = reflection.getAnnotatedClasses(
 							com.tvd12.quick.rpc.core.annotation.RpcRequest.class);
@@ -542,9 +551,12 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 			}
 			if(serverAddresses.isEmpty())
 				serverAddresses.add(new RpcSocketAddress("127.0.0.1", 3005));
+			return newProduct();
+		}
+		
+		protected QuickRpcClient newProduct() {
 			return new QuickRpcClient(this);
 		}
-	
 	}
 	
 	private static class RpcRequestIdGenerator {

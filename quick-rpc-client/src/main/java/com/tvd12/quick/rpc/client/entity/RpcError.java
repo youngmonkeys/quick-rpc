@@ -10,6 +10,6 @@ public interface RpcError {
 	
 	EzyData getRawData();
 
-	<T> T getData(Class<T> dataType);
+	<T> T getErrorData(Class<T> dataType);
 	
 }

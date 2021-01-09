@@ -20,7 +20,7 @@ public class RpcErrorException extends RuntimeException {
 	}
 	
 	public <T> T getErrorData(Class<T> dataType) {
-		return error.getData(dataType);
+		return error.getErrorData(dataType);
 	}
 
 }
