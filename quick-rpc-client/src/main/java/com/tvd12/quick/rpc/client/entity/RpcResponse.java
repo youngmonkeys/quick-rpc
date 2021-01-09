@@ -3,6 +3,7 @@ package com.tvd12.quick.rpc.client.entity;
 import com.tvd12.ezyfox.binding.EzyUnmarshaller;
 import com.tvd12.ezyfox.entity.EzyData;
 
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -10,6 +11,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class RpcResponse implements RpcError {
 
+	@Getter(AccessLevel.NONE)
 	protected final EzyUnmarshaller unmarshaller;
 	protected final String command;
 	protected final String requestId;

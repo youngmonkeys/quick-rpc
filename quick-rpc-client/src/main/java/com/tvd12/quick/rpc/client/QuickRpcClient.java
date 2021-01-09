@@ -6,11 +6,9 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -56,6 +54,8 @@ import com.tvd12.quick.rpc.client.exception.RpcErrorException;
 import com.tvd12.quick.rpc.client.net.RpcSocketAddress;
 import com.tvd12.quick.rpc.core.constant.RpcInternalCommands;
 import com.tvd12.quick.rpc.core.util.RpcRequestDataClasses;
+
+import lombok.AllArgsConstructor;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
@@ -179,23 +179,15 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 		String command = getRequestCommand(request);
 		String requestId = getRequestId(request, command);
 		EzyFuture future = internalSubmit(command, requestId, request.getData());
-		return new FutureTask<RpcResponse>(new Callable<RpcResponse>() {
+		return new AbstractRpcFuture<RpcResponse>(future, requestId) {
 			@Override
-			public RpcResponse call() throws Exception {
-				return future.get();
+			protected EzyFutureMap getFutureMap() {
+				return getFutures(command);
 			}
-		}) {
+			
 			@Override
-			public RpcResponse get(long timeout, TimeUnit unit)
-			        throws InterruptedException, ExecutionException, TimeoutException {
-				try {
-					return super.get(timeout, unit);
-				}
-				catch (TimeoutException e) {
-					EzyFutureMap<String> futures = getFutures(command);
-					futures.removeFuture(requestId);
-					throw e;
-				}
+			protected RpcResponse processResponse(RpcResponse response) throws ExecutionException {
+				return response;
 			}
 		};
 	}
@@ -210,32 +202,19 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 		String command = getRequestCommand(request);
 		String requestId = getRequestId(request, command);
 		EzyFuture future = internalSubmit(command, requestId, request.getData());
-		return new FutureTask<T>(new Callable<T>() {
+		return new AbstractRpcFuture<T>(future, requestId) {
 			@Override
-			public T call() throws Exception {
-				RpcResponse response = future.get();
-				if(response.isError()) {
-					throw new RpcErrorException(
-							response.getCommand(), 
-							response.getRequestId(), response);
-				}
-				return response.getData(responseDataType);
+			protected EzyFutureMap getFutureMap() {
+				return getFutures(command);
 			}
-		}) {
+			
 			@Override
-			public T get(long timeout, TimeUnit unit)
-			        throws InterruptedException, ExecutionException, TimeoutException {
-				try {
-					return super.get(timeout, unit);
-				}
-				catch (TimeoutException e) {
-					EzyFutureMap<String> futures = getFutures(command);
-					futures.removeFuture(requestId);
-					throw e;
-				}
+			protected T getResponseData(RpcResponse response) {
+				return response.getData(responseDataType);
 			}
 		};
 	}
+	
 	
 	protected EzyFuture internalSubmit(
 			String command, String requestId, Object requestData) {
@@ -579,6 +558,84 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 			return Long.toString(incrementer.incrementAndGet(), Character.MAX_RADIX);
 		}
 		
+	}
+
+}
+
+@AllArgsConstructor
+abstract class AbstractRpcFuture<T> implements Future<T> {
+	
+	private final EzyFuture future;
+	private final String requestId;
+	
+	@Override
+	public T get() throws InterruptedException, ExecutionException {
+		RpcResponse response;
+		try {
+			response = future.get();
+		}
+		catch(InterruptedException | ExecutionException e) {
+			throw e;
+		}
+		catch(Exception e) {
+			throw new ExecutionException(e);
+		}
+		return processResponse(response);
+	}
+	
+	@Override
+	public T get(long timeout, TimeUnit unit)
+	        throws InterruptedException, ExecutionException, TimeoutException {
+		RpcResponse response;
+		try {
+			response = future.get(TimeUnit.MILLISECONDS.convert(timeout, unit));
+		}
+		catch (TimeoutException e) {
+			EzyFutureMap<String> futures = getFutureMap();
+			futures.removeFuture(requestId);
+			throw e;
+		}
+		catch(InterruptedException | ExecutionException e) {
+			throw e;
+		}
+		catch(Exception e) {
+			throw new ExecutionException(e);
+		}
+		return processResponse(response);
+	}
+	
+	protected abstract EzyFutureMap<String> getFutureMap();
+	
+	protected T processResponse(RpcResponse response) throws ExecutionException {
+		if(response.isError()) {
+			RpcErrorException rpcException = new RpcErrorException(
+					response.getCommand(), 
+					response.getRequestId(), response);
+			throw new ExecutionException(rpcException);
+		}
+		return getResponseData(response);
+	}
+	
+	@SuppressWarnings("unchecked")
+	protected T getResponseData(RpcResponse response) {
+		return (T)response;
+	}
+	
+	@Override
+	public boolean cancel(boolean mayInterruptIfRunning) {
+		future.cancel("cancel rpc call");
+		return true;
+	}
+
+	@Override
+	public boolean isCancelled() {
+		future.cancel("cancel rpc call");
+		return true;
+	}
+
+	@Override
+	public boolean isDone() {
+		return future.isDone();
 	}
 
 }
