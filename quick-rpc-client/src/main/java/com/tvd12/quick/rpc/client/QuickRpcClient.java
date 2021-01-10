@@ -52,6 +52,7 @@ import com.tvd12.quick.rpc.client.exception.RpcClientMaxCapacityException;
 import com.tvd12.quick.rpc.client.exception.RpcClientNotConnectedException;
 import com.tvd12.quick.rpc.client.exception.RpcErrorException;
 import com.tvd12.quick.rpc.client.net.RpcSocketAddress;
+import com.tvd12.quick.rpc.client.net.RpcURI;
 import com.tvd12.quick.rpc.core.constant.RpcInternalCommands;
 import com.tvd12.quick.rpc.core.data.RpcBadRequestErrorData;
 import com.tvd12.quick.rpc.core.util.RpcRequestDataClasses;
@@ -282,6 +283,7 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 							if(app != null) { 
 								app.send(m);
 								sent = true;
+								break;
 							}
 						}
 					}
@@ -467,12 +469,22 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 		}
 	
 		public Builder username(String username) {
-			this.username = username;
+			if(username != null)
+				this.username = username;
 			return this;
 		}
 	
 		public Builder password(String password) {
-			this.password = password;
+			if(password != null)
+				this.password = password;
+			return this;
+		}
+		
+		public Builder connectTo(String uri) {
+			RpcURI rpcUri = new RpcURI(uri);
+			username(rpcUri.getUsername());
+			password(rpcUri.getPassword());
+			serverAddresses.add(rpcUri.getSocketAddress());
 			return this;
 		}
 		

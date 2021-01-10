@@ -283,6 +283,7 @@ public class QuickRpcClientTest {
 				.threadPoolSize(clientThreadPoolSize)
 				.processEventInterval(clientProcessEventInterval)
 				.defaultRequestTimeout(clientDefaultRequestTimeout)
+				.connectTo("quickrpc://localhost")
 				.scan("com.tvd12.quick.rpc.client.test.data")
 				.scan("com.tvd12.quick.rpc.client.test.data", "com.tvd12.quick.rpc.client.test.data")
 				.scan(Arrays.asList("com.tvd12.quick.rpc.client.test.data"));

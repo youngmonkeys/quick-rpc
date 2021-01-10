@@ -17,6 +17,7 @@ public class RpcSocketAddressTest {
 		
 		// then
 		assert address.toString().equals(host + ":" + port);
+		assert address.hashCode() != 0;
 	}
 	
 }
