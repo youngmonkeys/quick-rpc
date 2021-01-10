@@ -19,6 +19,7 @@ import com.tvd12.ezyfoxserver.client.constant.EzyConnectionStatus;
 import com.tvd12.ezyfoxserver.client.entity.EzyApp;
 import com.tvd12.quick.rpc.client.QuickRpcClient;
 import com.tvd12.quick.rpc.client.constant.RpcClientType;
+import com.tvd12.quick.rpc.client.exception.RpcClientMaxCapacityException;
 import com.tvd12.quick.rpc.client.exception.RpcErrorException;
 import com.tvd12.quick.rpc.client.test.data.GreetRequest;
 import com.tvd12.quick.rpc.client.test.data.GreetResponse;
@@ -169,6 +170,18 @@ public class QuickRpcClientTest {
  		assert actual.equals(new GreetResponse("Greet Dzung!"));
 	}
 	
+	@Test(expectedExceptions = RpcClientMaxCapacityException.class)
+	public void maxCapacityTest() throws Exception {
+		// given
+		QuickRpcClient sut = makeQuickRpcClientBuilder()
+				.capacity(0)
+				.build();
+		
+		// when
+		// then
+		sut.call(new GreetRequest("Dzung"));
+	}
+	
 	private QuickRpcClient makeQuickRpcClient() {
 		return makeQuickRpcClient(true);
 	}
@@ -178,6 +191,17 @@ public class QuickRpcClientTest {
 	}
 	
 	private QuickRpcClient makeQuickRpcClient(
+			RpcClientType clientType,
+			boolean success) {
+		return makeQuickRpcClientBuilder(clientType, success)
+				.build();
+	}
+	
+	private QuickRpcClient.Builder makeQuickRpcClientBuilder() {
+		return makeQuickRpcClientBuilder(RpcClientType.SINGLE, true);
+	}
+	
+	private QuickRpcClient.Builder makeQuickRpcClientBuilder(
 			RpcClientType clientType,
 			boolean success) {
 		Function<EzyClientConfig, EzyClient> clientSupplier = config -> {
@@ -242,10 +266,10 @@ public class QuickRpcClientTest {
 				}
 			};
 		};
-		return newQuickRpcClient(clientType, clientSupplier);
+		return newQuickRpcClientBuilder(clientType, clientSupplier);
 	}
 	
-	private QuickRpcClient newQuickRpcClient(
+	private QuickRpcClient.Builder newQuickRpcClientBuilder(
 			RpcClientType clientType,
 			Function<EzyClientConfig, EzyClient> clientSupplier) {
 		return new QuickRpcClientForTest.Builder()
@@ -261,8 +285,7 @@ public class QuickRpcClientTest {
 				.defaultRequestTimeout(clientDefaultRequestTimeout)
 				.scan("com.tvd12.quick.rpc.client.test.data")
 				.scan("com.tvd12.quick.rpc.client.test.data", "com.tvd12.quick.rpc.client.test.data")
-				.scan(Arrays.asList("com.tvd12.quick.rpc.client.test.data"))
-				.build();
+				.scan(Arrays.asList("com.tvd12.quick.rpc.client.test.data"));
 	}
 	
 	private static class QuickRpcClientForTest extends QuickRpcClient {

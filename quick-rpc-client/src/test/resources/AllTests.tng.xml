@@ -5,6 +5,8 @@
     <test name="All">
     	<packages>
     		<package name="com.tvd12.quick.rpc.client.test"/>
+    		<package name="com.tvd12.quick.rpc.client.test.entity"/>
+    		<package name="com.tvd12.quick.rpc.client.test.net"/>
     	</packages>
     </test>
 </suite>

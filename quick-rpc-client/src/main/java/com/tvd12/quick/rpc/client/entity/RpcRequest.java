@@ -1,8 +1,6 @@
 package com.tvd12.quick.rpc.client.entity;
 
 import com.tvd12.ezyfox.builder.EzyBuilder;
-import com.tvd12.ezyfox.util.EzyEquals;
-import com.tvd12.ezyfox.util.EzyHashCodes;
 
 import lombok.Getter;
 
@@ -31,22 +29,6 @@ public class RpcRequest {
 	
 	public Class<?> getDataType() {
 		return data.getClass();
-	}
-	
-	@Override
-	public boolean equals(Object obj) {
-		return new EzyEquals<RpcRequest>()
-				.function(t -> t.command)
-				.function(t -> t.id)
-				.isEquals(this, obj);
-	}
-	
-	@Override
-	public int hashCode() {
-		return new EzyHashCodes(2)
-				.append(command)
-				.append(id)
-				.toHashCode();
 	}
 	
 	@Override
