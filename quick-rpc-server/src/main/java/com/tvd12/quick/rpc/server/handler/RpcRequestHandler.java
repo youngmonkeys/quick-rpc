@@ -7,7 +7,7 @@ import com.tvd12.quick.rpc.server.entity.RpcResponse;
 public interface RpcRequestHandler<D> {
 
 	void handle(RpcRequest<D> request, RpcResponse response);
-
+	
 	@SuppressWarnings("unchecked")
 	default Class<D> getDataType() {
 		try {

@@ -1,5 +1,7 @@
 package com.tvd12.quick.rpc.client;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,6 +21,7 @@ import com.tvd12.ezyfox.binding.EzyBindingContext;
 import com.tvd12.ezyfox.binding.EzyBindingContextBuilder;
 import com.tvd12.ezyfox.binding.EzyMarshaller;
 import com.tvd12.ezyfox.binding.EzyUnmarshaller;
+import com.tvd12.ezyfox.binding.writer.EzyDefaultWriter;
 import com.tvd12.ezyfox.builder.EzyBuilder;
 import com.tvd12.ezyfox.concurrent.EzyFuture;
 import com.tvd12.ezyfox.concurrent.EzyFutureConcurrentHashMap;
@@ -55,6 +58,7 @@ import com.tvd12.quick.rpc.client.net.RpcSocketAddress;
 import com.tvd12.quick.rpc.client.net.RpcURI;
 import com.tvd12.quick.rpc.core.constant.RpcInternalCommands;
 import com.tvd12.quick.rpc.core.data.RpcBadRequestErrorData;
+import com.tvd12.quick.rpc.core.util.RpcPropertiesKeeper;
 import com.tvd12.quick.rpc.core.util.RpcRequestDataClasses;
 
 import lombok.AllArgsConstructor;
@@ -81,6 +85,12 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 	protected final RpcRequestIdGenerator requestIdGenerator;
 	protected final Map<String, EzyFutureMap<String>> futureMap;
 	protected final LinkedList<RpcSocketAddress> serverAddresses;
+	
+	public static final String HOST = "quickrpc.host";
+	public static final String PORT = "quickrpc.port";
+	public static final String URI = "quickrpc.uri";
+	public static final String USERNAME = "quickrpc.username";
+	public static final String PASSWORD = "quickrpc.password";
 
 	protected QuickRpcClient(Builder builder) {
 		this.name = builder.name;
@@ -409,7 +419,7 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 						logger.warn("has no future map to command: {} and id: {}", cmd, id);
 						return;
 					}
-					EzyData result = data.get(2, EzyData.class);
+					Object result = data.get(2);
 					future.setResult(new RpcResponse(unmarshaller, cmd, id, result, false));
 				}
 			})
@@ -443,7 +453,9 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 		return new Builder();
 	}
 
-	public static class Builder implements EzyBuilder<QuickRpcClient> {
+	public static class Builder 
+			extends RpcPropertiesKeeper<Builder> 
+			implements EzyBuilder<QuickRpcClient> {
 	
 		protected int capacity = 10000;
 		protected String name = "rpc-client";
@@ -453,6 +465,7 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 		protected int processEventInterval = 3;
 		protected int defaultRequestTimeout = 5000;
 		protected EzyBindingContext bindingContext;
+		protected EzyBindingContextBuilder bindingContextBuilder;
 		protected Set<String> packagesToScan = new HashSet<>();
 		protected Map<Class, String> commands = new HashMap<>();
 		protected RpcClientType clientType = RpcClientType.SINGLE;
@@ -481,15 +494,23 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 		}
 		
 		public Builder connectTo(String uri) {
-			RpcURI rpcUri = new RpcURI(uri);
-			username(rpcUri.getUsername());
-			password(rpcUri.getPassword());
-			serverAddresses.add(rpcUri.getSocketAddress());
+			if(uri != null) {
+				RpcURI rpcUri = new RpcURI(uri);
+				username(rpcUri.getUsername());
+				password(rpcUri.getPassword());
+				serverAddresses.add(rpcUri.getSocketAddress());
+			}
 			return this;
 		}
 		
 		public Builder connectTo(String host, int port) {
 			serverAddresses.addFirst(new RpcSocketAddress(host, port));
+			return this;
+		}
+		
+		public Builder connectTo(String host, String port) {
+			if(host != null)
+				connectTo(host, port != null ? Integer.parseInt(port) : 3005);
 			return this;
 		}
 	
@@ -533,8 +554,21 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 			return this;
 		}
 		
+		public Builder bindingContextBuilder(EzyBindingContextBuilder bindingContextBuilder) {
+			this.bindingContextBuilder = bindingContextBuilder;
+			return this;
+		}
+		
 		@Override
 		public QuickRpcClient build() {
+			if(serverAddresses.isEmpty())
+				connectTo(properties.getProperty(URI));
+			if(serverAddresses.isEmpty())
+				connectTo(properties.getProperty(HOST), properties.getProperty(PORT));
+			if(username == null)
+				username(properties.getProperty(USERNAME));
+			if(password == null)
+				password(properties.getProperty(PASSWORD));
 			EzyReflection reflection = null;
 			if(packagesToScan.size() > 0)
 				reflection = new EzyReflectionProxy(packagesToScan);
@@ -545,8 +579,12 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 					commands.put(cls, RpcRequestDataClasses.getCommand(cls));
 			}
 			if(bindingContext == null) {
-				EzyBindingContextBuilder builder = EzyBindingContext.builder()
-						.addArrayBindingClass(RpcBadRequestErrorData.class);
+				if(bindingContextBuilder == null) {
+					bindingContextBuilder = EzyBindingContext.builder()
+						.addArrayBindingClass(RpcBadRequestErrorData.class)
+						.addTemplate(BigDecimal.class, EzyDefaultWriter.getInstance())
+						.addTemplate(BigInteger.class, EzyDefaultWriter.getInstance());
+				}
 				if(reflection != null) {
 					Set<Class<?>> requestDataClasses = reflection.getAnnotatedClasses(
 							com.tvd12.quick.rpc.core.annotation.RpcRequest.class);
@@ -554,12 +592,12 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 							com.tvd12.quick.rpc.core.annotation.RpcResponse.class);
 					Set<Class<?>> errorDataClasses = reflection.getAnnotatedClasses(
 							com.tvd12.quick.rpc.core.annotation.RpcError.class);
-					builder.addClasses((Set)requestDataClasses);
-					builder.addClasses((Set)responseDataClasses);
-					builder.addClasses((Set)errorDataClasses);
-					builder.addAllClasses(reflection);
+					bindingContextBuilder.addClasses((Set)requestDataClasses);
+					bindingContextBuilder.addClasses((Set)responseDataClasses);
+					bindingContextBuilder.addClasses((Set)errorDataClasses);
+					bindingContextBuilder.addAllClasses(reflection);
 				}
-				bindingContext = builder.build();
+				bindingContext = bindingContextBuilder.build();
 			}
 			if(serverAddresses.isEmpty())
 				serverAddresses.add(new RpcSocketAddress("127.0.0.1", 3005));

@@ -33,6 +33,6 @@
 	</dependencies>
 	
 	<modules>
-		<module>quiick-rpc-hello-world</module>
+		<module>quick-rpc-hello-world</module>
 	</modules>
 </project>

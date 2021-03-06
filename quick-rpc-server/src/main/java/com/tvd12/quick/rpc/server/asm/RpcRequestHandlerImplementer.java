@@ -128,7 +128,7 @@ public class RpcRequestHandlerImplementer
 			instruction.append(answerExpression);
 		body.append(instruction);
 		if(returnType == void.class)
-			body.append(new EzyInstruction("\t", "\n").append("return null"));
+			body.append(new EzyInstruction("\t", "\n").append("return NO_RESPONSE"));
 		return function.toString();
 	}
 	

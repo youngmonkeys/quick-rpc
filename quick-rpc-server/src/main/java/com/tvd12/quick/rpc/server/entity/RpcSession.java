@@ -2,7 +2,6 @@ package com.tvd12.quick.rpc.server.entity;
 
 import com.tvd12.ezyfox.binding.EzyMarshaller;
 import com.tvd12.ezyfox.entity.EzyArray;
-import com.tvd12.ezyfox.entity.EzyData;
 import com.tvd12.ezyfox.factory.EzyEntityFactory;
 import com.tvd12.ezyfoxserver.context.EzyAppContext;
 import com.tvd12.ezyfoxserver.entity.EzySession;
@@ -44,7 +43,7 @@ public class RpcSession {
 	protected void internalSend(
 			String internalCommand, 
 			String cmd, String responseId, Object data) {
-		EzyData responseData = marshaller.marshal(data);
+		Object responseData = marshaller.marshal(data);
 		EzyArray commandData = EzyEntityFactory.newArray();
 		commandData.add(cmd, responseId, responseData);
 		EzyArray response = EzyEntityFactory.newArray();

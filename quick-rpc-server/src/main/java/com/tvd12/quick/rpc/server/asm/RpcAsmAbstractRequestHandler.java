@@ -12,18 +12,20 @@ public abstract class RpcAsmAbstractRequestHandler implements RpcAsmRequestHandl
 	@Setter
 	protected String command;
 	
+	protected static final Object NO_RESPONSE = new Object();
+	
 	@Override
 	public void handle(RpcRequest<Object> request, RpcResponse response) {
 		try {
 			Object responseData = handleRequest(request, response);
-			if(responseData != null)
+			if(responseData != NO_RESPONSE)
 				response.write(responseData);
 		}
 		catch (Exception e) {
 			handleException(request, response, e);
 		}
 	}
-	
+
 	protected abstract Object handleRequest(
 			RpcRequest<Object> request, RpcResponse response);
 	

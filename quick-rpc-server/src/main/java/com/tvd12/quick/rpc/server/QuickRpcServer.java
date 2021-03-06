@@ -1,5 +1,7 @@
 package com.tvd12.quick.rpc.server;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -14,10 +16,10 @@ import com.tvd12.ezyfox.binding.EzyBindingContext;
 import com.tvd12.ezyfox.binding.EzyBindingContextBuilder;
 import com.tvd12.ezyfox.binding.EzyMarshaller;
 import com.tvd12.ezyfox.binding.EzyUnmarshaller;
+import com.tvd12.ezyfox.binding.writer.EzyDefaultWriter;
 import com.tvd12.ezyfox.io.EzyMaps;
 import com.tvd12.ezyfox.reflect.EzyReflection;
 import com.tvd12.ezyfox.reflect.EzyReflectionProxy;
-import com.tvd12.ezyfox.util.EzyLoggable;
 import com.tvd12.ezyfox.util.EzyStoppable;
 import com.tvd12.ezyfoxserver.config.EzyConfig;
 import com.tvd12.ezyfoxserver.config.EzyConfigBuilder;
@@ -48,6 +50,7 @@ import com.tvd12.quick.rpc.core.annotation.RpcError;
 import com.tvd12.quick.rpc.core.annotation.RpcRequest;
 import com.tvd12.quick.rpc.core.annotation.RpcResponse;
 import com.tvd12.quick.rpc.core.data.RpcBadRequestErrorData;
+import com.tvd12.quick.rpc.core.util.RpcPropertiesKeeper;
 import com.tvd12.quick.rpc.core.util.RpcRequestDataClasses;
 import com.tvd12.quick.rpc.server.annotation.RpcController;
 import com.tvd12.quick.rpc.server.annotation.RpcExceptionHandler;
@@ -69,23 +72,33 @@ import com.tvd12.quick.rpc.server.transport.RpcPluginEntryLoader;
 import com.tvd12.quick.rpc.server.util.RpcHandlerAnnotations;
 
 @SuppressWarnings("rawtypes")
-public class QuickRpcServer extends EzyLoggable implements EzyStoppable {
+public class QuickRpcServer 
+		extends RpcPropertiesKeeper<QuickRpcServer> 
+		implements EzyStoppable {
 
 	protected EzyEmbeddedServer transporter;
 	protected EzyBeanContext beanContext;
 	protected EzyBindingContext bindingContext;
-	protected final QuickRpcSettings settings;
+	protected EzyBeanContextBuilder beanContextBuilder;
+	protected EzyBindingContextBuilder bindingContextBuilder;
+	protected QuickRpcSettings settings;
 	protected final Set<String> packagesToScan;
 	protected final Map<String, RpcRequestHandler> requestHandlers;
 	protected final List<RpcRequestInterceptor> requestInterceptors;
 	protected final Map<Class<?>, RpcUncaughtExceptionHandler> exceptionHandlers;
 	
-	public QuickRpcServer(QuickRpcSettings settings) {
-		this.settings = settings;
+	{
 		this.packagesToScan = new HashSet<>();
 		this.requestHandlers = new HashMap<>();
 		this.exceptionHandlers = new HashMap<>();
 		this.requestInterceptors = new ArrayList<>();
+	}
+	
+	public QuickRpcServer() {}
+	
+	public QuickRpcServer(QuickRpcSettings settings) {
+		this.settings = settings;
+		
 	}
 	
 	public QuickRpcServer scan(String packageToScan) {
@@ -103,8 +116,23 @@ public class QuickRpcServer extends EzyLoggable implements EzyStoppable {
 		return this;
 	}
 	
+	public QuickRpcServer settings(QuickRpcSettings settings) {
+		this.settings = settings;
+		return this;
+	}
+	
 	public QuickRpcServer beanContext(EzyBeanContext beanContext) {
 		this.beanContext = beanContext;
+		return this;
+	}
+	
+	public QuickRpcServer beanContextBuilder(EzyBeanContextBuilder beanContextBuilder) {
+		this.beanContextBuilder = beanContextBuilder;
+		return this;
+	}
+	
+	public QuickRpcServer bindingContextBuilder(EzyBindingContextBuilder bindingContextBuilder) {
+		this.bindingContextBuilder = bindingContextBuilder;
 		return this;
 	}
 	
@@ -135,14 +163,20 @@ public class QuickRpcServer extends EzyLoggable implements EzyStoppable {
 	
 	@SuppressWarnings("unchecked")
 	public RpcServerContext start() throws Exception {
+		if(settings == null) {
+			settings = QuickRpcSettings.builder()
+					.properties(properties)
+					.build();
+		}
 		EzyReflection reflection = null;
 		if(packagesToScan.size() > 0)
 			reflection = new EzyReflectionProxy(packagesToScan);
 		RpcSessionManager sessionManager = new RpcSessionManager();
 		if(beanContext == null) {
-			EzyBeanContextBuilder builder = EzyBeanContext.builder();
+			if(beanContextBuilder == null)
+				beanContextBuilder= EzyBeanContext.builder();
 			if(reflection != null) {
-				builder
+				beanContextBuilder
 					.addSingletonClasses((Set)reflection.getAnnotatedClasses(RpcHandler.class))
 					.addSingletonClasses((Set)reflection.getAnnotatedClasses(RpcController.class))
 					.addSingletonClasses((Set)reflection.getAnnotatedClasses(RpcExceptionHandler.class))
@@ -150,21 +184,25 @@ public class QuickRpcServer extends EzyLoggable implements EzyStoppable {
 					.addAllClasses(reflection)
 					.addSingleton("sessionManager", sessionManager);
 			}
-			beanContext = builder.build();
+			beanContext = beanContextBuilder.build();
 		}
 		if(bindingContext == null) {
-			EzyBindingContextBuilder builder = EzyBindingContext.builder()
-					.addArrayBindingClass(RpcBadRequestErrorData.class);
+			if(bindingContextBuilder == null) {
+				bindingContextBuilder = EzyBindingContext.builder()
+					.addArrayBindingClass(RpcBadRequestErrorData.class)
+					.addTemplate(BigDecimal.class, EzyDefaultWriter.getInstance())
+					.addTemplate(BigInteger.class, EzyDefaultWriter.getInstance());
+			}
 			if(reflection != null) {
 				Set<Class<?>> requestDataClasses = reflection.getAnnotatedClasses(RpcRequest.class);
 				Set<Class<?>> responseDataClasses = reflection.getAnnotatedClasses(RpcResponse.class);
 				Set<Class<?>> errorDataClasses = reflection.getAnnotatedClasses(RpcError.class);
-				builder.addClasses((Set)requestDataClasses);
-				builder.addClasses((Set)responseDataClasses);
-				builder.addClasses((Set)errorDataClasses);
-				builder.addAllClasses(reflection);
+				bindingContextBuilder.addClasses((Set)requestDataClasses);
+				bindingContextBuilder.addClasses((Set)responseDataClasses);
+				bindingContextBuilder.addClasses((Set)errorDataClasses);
+				bindingContextBuilder.addAllClasses(reflection);
 			}
-			bindingContext = builder.build();
+			bindingContext = bindingContextBuilder.build();
 		}
 		List<Object> controllers = beanContext.getSingletons(RpcController.class);
 		RpcRequestHandlersImplementer requestHandlersImplementer = new RpcRequestHandlersImplementer();
