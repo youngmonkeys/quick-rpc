@@ -18,6 +18,11 @@ public class RpcRequestHandlers {
 		return handlers.get(command);
 	}
 	
+	@Override
+	public String toString() {
+		return "RpcRequestHandlers(" + handlers + ")";
+	}
+	
 	public static Builder builder() {
 		return new Builder();
 	}

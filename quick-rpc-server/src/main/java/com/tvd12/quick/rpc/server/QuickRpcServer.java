@@ -2,13 +2,12 @@ package com.tvd12.quick.rpc.server;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import com.tvd12.ezyfox.bean.EzyBeanContext;
 import com.tvd12.ezyfox.bean.EzyBeanContextBuilder;
@@ -53,11 +52,17 @@ import com.tvd12.quick.rpc.core.data.RpcBadRequestErrorData;
 import com.tvd12.quick.rpc.core.util.RpcPropertiesKeeper;
 import com.tvd12.quick.rpc.core.util.RpcRequestDataClasses;
 import com.tvd12.quick.rpc.server.annotation.RpcController;
+import com.tvd12.quick.rpc.server.annotation.RpcEventHandled;
 import com.tvd12.quick.rpc.server.annotation.RpcExceptionHandler;
-import com.tvd12.quick.rpc.server.annotation.RpcHandler;
 import com.tvd12.quick.rpc.server.annotation.RpcInterceptor;
+import com.tvd12.quick.rpc.server.annotation.RpcRequestHandled;
 import com.tvd12.quick.rpc.server.asm.RpcExceptionHandlersImplementer;
 import com.tvd12.quick.rpc.server.asm.RpcRequestHandlersImplementer;
+import com.tvd12.quick.rpc.server.entity.RpcSession;
+import com.tvd12.quick.rpc.server.event.RpcEventType;
+import com.tvd12.quick.rpc.server.event.RpcSessionRemoveEvent;
+import com.tvd12.quick.rpc.server.handler.RpcEventHandler;
+import com.tvd12.quick.rpc.server.handler.RpcEventHandlers;
 import com.tvd12.quick.rpc.server.handler.RpcExceptionHandlers;
 import com.tvd12.quick.rpc.server.handler.RpcRequestHandler;
 import com.tvd12.quick.rpc.server.handler.RpcRequestHandlers;
@@ -82,16 +87,22 @@ public class QuickRpcServer
 	protected EzyBeanContextBuilder beanContextBuilder;
 	protected EzyBindingContextBuilder bindingContextBuilder;
 	protected QuickRpcSettings settings;
+	protected RpcEventHandlers eventHandlers;
+	protected RpcRequestHandlers requestHandlers;
+	protected RpcRequestInterceptors requestInterceptors;
+	protected RpcExceptionHandlers exceptionHandlers;
 	protected final Set<String> packagesToScan;
-	protected final Map<String, RpcRequestHandler> requestHandlers;
-	protected final List<RpcRequestInterceptor> requestInterceptors;
-	protected final Map<Class<?>, RpcUncaughtExceptionHandler> exceptionHandlers;
+	protected final RpcEventHandlers.Builder eventHandlersBuilder;
+	protected final RpcRequestHandlers.Builder requestHandlersBuilder;
+	protected final RpcRequestInterceptors.Builder requestInterceptorsBuilder;
+	protected final RpcExceptionHandlers.Builder exceptionHandlersBuilder;
 	
 	{
 		this.packagesToScan = new HashSet<>();
-		this.requestHandlers = new HashMap<>();
-		this.exceptionHandlers = new HashMap<>();
-		this.requestInterceptors = new ArrayList<>();
+		this.eventHandlersBuilder = RpcEventHandlers.builder();
+		this.requestHandlersBuilder = RpcRequestHandlers.builder();
+		this.requestInterceptorsBuilder = RpcRequestInterceptors.builder();
+		this.exceptionHandlersBuilder = RpcExceptionHandlers.builder();
 	}
 	
 	public QuickRpcServer() {}
@@ -142,7 +153,7 @@ public class QuickRpcServer
 	}
 	
 	public <D> QuickRpcServer addRequestHandler(String cmd, RpcRequestHandler<D> handler) {
-		this.requestHandlers.put(cmd, handler);
+		this.requestHandlersBuilder.addHandler(cmd, handler);
 		return this;
 	}
 	
@@ -151,13 +162,25 @@ public class QuickRpcServer
 	}
 	
 	public QuickRpcServer addRequestInterceptor(RpcRequestInterceptor interceptor) {
-		this.requestInterceptors.add(interceptor);
+		this.requestInterceptorsBuilder.addInteceptor(interceptor);
 		return this;
 	}
 	
 	public QuickRpcServer addExceptionHandler(
 			Class<?> exceptionClass, RpcUncaughtExceptionHandler handler) {
-		this.exceptionHandlers.put(exceptionClass, handler);
+		this.exceptionHandlersBuilder.addHandler(exceptionClass, handler);
+		return this;
+	}
+	
+	public QuickRpcServer onSessionRemoved(Consumer<RpcSession> handler) {
+		return this.addEventHandler(
+				RpcEventType.SESSION_REMOVED, 
+				e -> handler.accept(((RpcSessionRemoveEvent)e).getSession())
+		);
+	}
+	
+	public QuickRpcServer addEventHandler(RpcEventType eventType, RpcEventHandler handler) {
+		this.eventHandlersBuilder.addHandler(eventType, handler);
 		return this;
 	}
 	
@@ -177,7 +200,8 @@ public class QuickRpcServer
 				beanContextBuilder= EzyBeanContext.builder();
 			if(reflection != null) {
 				beanContextBuilder
-					.addSingletonClasses((Set)reflection.getAnnotatedClasses(RpcHandler.class))
+				.addSingletonClasses((Set)reflection.getAnnotatedClasses(RpcEventHandled.class))
+					.addSingletonClasses((Set)reflection.getAnnotatedClasses(RpcRequestHandled.class))
 					.addSingletonClasses((Set)reflection.getAnnotatedClasses(RpcController.class))
 					.addSingletonClasses((Set)reflection.getAnnotatedClasses(RpcExceptionHandler.class))
 					.addSingletonClasses((Set)reflection.getAnnotatedClasses(RpcInterceptor.class))
@@ -204,30 +228,40 @@ public class QuickRpcServer
 			}
 			bindingContext = bindingContextBuilder.build();
 		}
+		eventHandlersBuilder.addHandlers(
+			(Map)EzyMaps.newHashMap(
+				beanContext.getSingletons(RpcEventHandled.class), 
+				it -> it.getClass().getAnnotation(RpcEventHandled.class).value()
+			)
+		);
+		
 		List<Object> controllers = beanContext.getSingletons(RpcController.class);
 		RpcRequestHandlersImplementer requestHandlersImplementer = new RpcRequestHandlersImplementer();
-		this.requestHandlers.putAll(requestHandlersImplementer.implement(controllers));
-		this.requestHandlers.putAll((Map)EzyMaps.newHashMap(
-				beanContext.getSingletons(RpcHandler.class), 
-				b -> RpcHandlerAnnotations.getCommand(b.getClass())));
-		RpcRequestHandlers requestHandlers = RpcRequestHandlers.builder()
-				.addHandlers((Map)this.requestHandlers)
-				.build();
-		this.requestInterceptors.addAll(beanContext.getSingletons(RpcInterceptor.class));
-		RpcRequestInterceptors requestInterceptors = RpcRequestInterceptors.builder()
-				.addInteceptors((List)this.requestInterceptors)
-				.build();
+		requestHandlersBuilder.addHandlers(requestHandlersImplementer.implement(controllers));
+		requestHandlersBuilder.addHandlers(
+			(Map)EzyMaps.newHashMap(
+				beanContext.getSingletons(RpcRequestHandled.class), 
+				it -> RpcHandlerAnnotations.getCommand(it.getClass())
+			)
+		);
+		
+		requestInterceptorsBuilder.addInteceptors(beanContext.getSingletons(RpcInterceptor.class));
+		
 		List<Object> exceptionControllers = beanContext.getSingletons(RpcExceptionHandler.class);
 		RpcExceptionHandlersImplementer exceptionHandlersImplementer = new RpcExceptionHandlersImplementer();
-		this.exceptionHandlers.putAll(exceptionHandlersImplementer.implement(exceptionControllers));
-		RpcExceptionHandlers exceptionHandlers = RpcExceptionHandlers.builder()
-				.addHandlers((Map)this.exceptionHandlers)
-				.build();
+		exceptionHandlersBuilder.addHandlers(exceptionHandlersImplementer.implement(exceptionControllers));
+		
+		eventHandlers = eventHandlersBuilder.build();
+		requestHandlers = requestHandlersBuilder.build();
+		requestInterceptors = requestInterceptorsBuilder.build();
+		exceptionHandlers = exceptionHandlersBuilder.build();
+		
 		RpcComponentManager componentManager = new RpcComponentManager();
 		componentManager.addComponent(EzyBeanContext.class, beanContext);
 		componentManager.addComponent(EzyMarshaller.class, bindingContext.newMarshaller());
 		componentManager.addComponent(EzyUnmarshaller.class, bindingContext.newUnmarshaller());
 		componentManager.addComponent(RpcSessionManager.class, sessionManager);
+		componentManager.addComponent(RpcEventHandlers.class, eventHandlers);
 		componentManager.addComponent(RpcRequestHandlers.class, requestHandlers);
 		componentManager.addComponent(RpcExceptionHandlers.class, exceptionHandlers);
 		componentManager.addComponent(RpcRequestInterceptors.class, requestInterceptors);
@@ -303,7 +337,8 @@ public class QuickRpcServer
 	@Override
 	public String toString() {
 		return new StringBuilder()
-				.append("requestHandlers: ").append(requestHandlers)
+				.append("eventHandlers: ").append(eventHandlers)
+				.append("\nrequestHandlers: ").append(requestHandlers)
 				.append("\nrequestIntercepters: ").append(requestInterceptors)
 				.append("\nexceptionHandlers: ").append(exceptionHandlers)
 				.toString();

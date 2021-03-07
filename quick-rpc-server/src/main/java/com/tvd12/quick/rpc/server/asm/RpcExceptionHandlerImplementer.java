@@ -10,8 +10,8 @@ import com.tvd12.ezyfox.reflect.EzyClass;
 import com.tvd12.ezyfox.reflect.EzyClassTree;
 import com.tvd12.ezyfox.reflect.EzyMethod;
 import com.tvd12.ezyfox.reflect.EzyMethods;
-import com.tvd12.ezyfoxserver.context.EzyContext;
-import com.tvd12.ezyfoxserver.event.EzyUserSessionEvent;
+import com.tvd12.quick.rpc.server.entity.RpcRequest;
+import com.tvd12.quick.rpc.server.entity.RpcResponse;
 import com.tvd12.quick.rpc.server.handler.RpcUncaughtExceptionHandler;
 import com.tvd12.quick.rpc.server.reflect.RpcExceptionHandlerMethod;
 import com.tvd12.quick.rpc.server.reflect.RpcExceptionHandlerProxy;
@@ -140,7 +140,8 @@ public class RpcExceptionHandlerImplementer
 		Method method = EzyMethods.getMethod(
 				RpcAsmAbstractUncaughtExceptionHandler.class, 
 				"handleException", 
-				EzyContext.class, EzyUserSessionEvent.class, String.class, Object.class, Exception.class);
+				RpcRequest.class, RpcResponse.class, Exception.class
+		);
 		return new EzyMethod(method);
 	}
 	

@@ -3,6 +3,7 @@ package com.tvd12.quick.rpc.server.reflect;
 import com.tvd12.ezyfox.core.annotation.EzyTryCatch;
 import com.tvd12.ezyfox.core.util.EzyTryCatchAnnotations;
 import com.tvd12.ezyfox.reflect.EzyMethod;
+import com.tvd12.quick.rpc.server.annotation.RpcTryCatch;
 
 import lombok.Getter;
 
@@ -18,9 +19,10 @@ public class RpcExceptionHandlerMethod extends RpcHandlerMethod {
 	}
 	
 	protected Class<?>[] fetchExceptionClasses() {
-		EzyTryCatch annotation = method.getAnnotation(EzyTryCatch.class);
-		Class<?>[] classes = EzyTryCatchAnnotations.getExceptionClasses(annotation);
-		return classes;
+		EzyTryCatch tryCatchAnnotation = method.getAnnotation(EzyTryCatch.class);
+		if(tryCatchAnnotation != null)
+			return EzyTryCatchAnnotations.getExceptionClasses(tryCatchAnnotation);
+		return method.getAnnotation(RpcTryCatch.class).value();
 	}
 	
 }

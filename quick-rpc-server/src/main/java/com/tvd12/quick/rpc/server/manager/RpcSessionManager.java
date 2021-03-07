@@ -19,8 +19,8 @@ public class RpcSessionManager {
 		this.sessions.put(session.getKey(), session);
 	}
 	
-	public void removeSession(Object key) {
-		this.sessions.remove(key);
+	public RpcSession removeSession(Object key) {
+		return this.sessions.remove(key);
 	}
 
 	public RpcSession getSession(Object key) {

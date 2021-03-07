@@ -9,7 +9,6 @@ import com.tvd12.quick.rpc.server.handler.RpcUncaughtExceptionHandler;
 import com.tvd12.quick.rpc.server.reflect.RpcExceptionHandlerMethod;
 import com.tvd12.quick.rpc.server.reflect.RpcExceptionHandlerProxy;
 
-@SuppressWarnings("rawtypes")
 public class RpcExceptionHandlersImplementer extends EzyLoggable {
 	
 	public Map<Class<?>, RpcUncaughtExceptionHandler> 

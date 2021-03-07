@@ -9,7 +9,6 @@ import com.tvd12.ezyfox.reflect.EzyClassTree;
 
 import lombok.Getter;
 
-@SuppressWarnings("rawtypes")
 public class RpcExceptionHandlers {
 
 	@Getter
@@ -20,6 +19,11 @@ public class RpcExceptionHandlers {
 	protected RpcExceptionHandlers(Builder builder) {
 		this.handlers = new HashMap<>(builder.handlers);
 		this.exceptionClasses = new EzyClassTree(handlers.keySet()).toList();
+	}
+	
+	@Override
+	public String toString() {
+		return "RpcExceptionHandlers(" + handlers + ")";
 	}
 	
 	public static Builder builder() {

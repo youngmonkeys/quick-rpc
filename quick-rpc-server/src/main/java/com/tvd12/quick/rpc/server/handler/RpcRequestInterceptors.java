@@ -16,6 +16,11 @@ public class RpcRequestInterceptors {
 		this.interceptors = new ArrayList<>(builder.interceptors);
 	}
 	
+	@Override
+	public String toString() {
+		return "RpcRequestInterceptors(" + interceptors + ")";
+	}
+	
 	public static Builder builder() {
 		return new Builder();
 	}

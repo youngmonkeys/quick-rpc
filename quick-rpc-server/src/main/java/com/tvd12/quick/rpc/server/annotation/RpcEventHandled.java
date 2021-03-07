@@ -6,6 +6,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import com.tvd12.quick.rpc.server.event.RpcEventType;
+
 /**
  * 
  * @author tavandung12
@@ -14,10 +16,8 @@ import java.lang.annotation.Target;
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })
-public @interface RpcHandler {
+public @interface RpcEventHandled {
 	
-	String value() default "";
-	
-	String command() default "";
+	RpcEventType value();
 	
 }

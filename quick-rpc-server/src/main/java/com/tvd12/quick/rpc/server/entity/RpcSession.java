@@ -55,6 +55,26 @@ public class RpcSession {
 		return session;
 	}
 	
+	public long getKeyId() {
+		return session.getId();
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj == null)
+			return false;
+		if(obj == this)
+			return true;
+		if(obj instanceof RpcSession)
+			return session.equals(((RpcSession)obj).session);
+		return false;
+	}
+	
+	@Override
+	public int hashCode() {
+		return session.hashCode();
+	}
+	
 	@Override
 	public String toString() {
 		return session.toString();
