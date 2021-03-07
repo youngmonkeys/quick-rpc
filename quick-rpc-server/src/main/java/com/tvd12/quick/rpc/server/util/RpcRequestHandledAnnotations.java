@@ -3,9 +3,9 @@ package com.tvd12.quick.rpc.server.util;
 import com.tvd12.ezyfox.io.EzyStrings;
 import com.tvd12.quick.rpc.server.annotation.RpcRequestHandled;
 
-public final class RpcHandlerAnnotations {
+public final class RpcRequestHandledAnnotations {
 
-	private RpcHandlerAnnotations() {}
+	private RpcRequestHandledAnnotations() {}
 	
 	public static String getCommand(RpcRequestHandled annotation) {
 		if(EzyStrings.isNoContent(annotation.value()))

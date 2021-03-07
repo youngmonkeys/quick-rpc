@@ -74,7 +74,7 @@ import com.tvd12.quick.rpc.server.manager.RpcSessionManager;
 import com.tvd12.quick.rpc.server.setting.QuickRpcSettings;
 import com.tvd12.quick.rpc.server.transport.RpcAppEntryLoader;
 import com.tvd12.quick.rpc.server.transport.RpcPluginEntryLoader;
-import com.tvd12.quick.rpc.server.util.RpcHandlerAnnotations;
+import com.tvd12.quick.rpc.server.util.RpcRequestHandledAnnotations;
 
 @SuppressWarnings("rawtypes")
 public class QuickRpcServer 
@@ -241,7 +241,7 @@ public class QuickRpcServer
 		requestHandlersBuilder.addHandlers(
 			(Map)EzyMaps.newHashMap(
 				beanContext.getSingletons(RpcRequestHandled.class), 
-				it -> RpcHandlerAnnotations.getCommand(it.getClass())
+				it -> RpcRequestHandledAnnotations.getCommand(it.getClass())
 			)
 		);
 		

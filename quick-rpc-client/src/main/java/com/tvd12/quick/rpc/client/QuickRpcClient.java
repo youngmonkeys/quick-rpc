@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
+import com.tvd12.ezyfox.bean.EzyBeanContext;
 import com.tvd12.ezyfox.binding.EzyBindingContext;
 import com.tvd12.ezyfox.binding.EzyBindingContextBuilder;
 import com.tvd12.ezyfox.binding.EzyMarshaller;
@@ -54,6 +55,8 @@ import com.tvd12.quick.rpc.client.exception.RpcClientLoginFailureException;
 import com.tvd12.quick.rpc.client.exception.RpcClientMaxCapacityException;
 import com.tvd12.quick.rpc.client.exception.RpcClientNotConnectedException;
 import com.tvd12.quick.rpc.client.exception.RpcErrorException;
+import com.tvd12.quick.rpc.client.handler.RpcResponseHandler;
+import com.tvd12.quick.rpc.client.handler.RpcResponseHandlers;
 import com.tvd12.quick.rpc.client.net.RpcSocketAddress;
 import com.tvd12.quick.rpc.client.net.RpcURI;
 import com.tvd12.quick.rpc.core.constant.RpcInternalCommands;
@@ -81,6 +84,7 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 	protected final EzyBindingContext bindingContext;
 	protected final Map<Class, String> commands;
 	protected final Consumer<EzyArray> messageSender;
+	protected final RpcResponseHandlers responseHandlers;
 	protected final LinkedList<EzyClient> transporters;
 	protected final RpcRequestIdGenerator requestIdGenerator;
 	protected final Map<String, EzyFutureMap<String>> futureMap;
@@ -111,6 +115,7 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 		this.commands = new ConcurrentHashMap<>(builder.commands);
 		this.serverAddresses = new LinkedList<>(builder.serverAddresses);
 		this.requestIdGenerator = new RpcRequestIdGenerator();
+		this.responseHandlers = builder.responseHandlers;
 		this.connect();
 		this.messageSender = newMessageSender();
 	}
@@ -410,7 +415,15 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 					String cmd = data.get(0, String.class);
 					EzyFutureMap<String> futures = futureMap.get(cmd);
 					if(futures == null) {
-						logger.warn("has no future map to command: {}", cmd);
+						RpcResponseHandler responseHandler = responseHandlers.getHandler(cmd);
+						if(responseHandler != null) {
+							String id = data.get(1, String.class);
+							Object result = data.get(2);
+							responseHandler.handle(new RpcResponse(unmarshaller, cmd, id, result, false));
+						}
+						else {
+							logger.warn("has no future map to command: {}", cmd);
+						}
 						return;
 					}
 					String id = data.get(1, String.class);
@@ -464,12 +477,19 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 		protected int threadPoolSize = 8;
 		protected int processEventInterval = 3;
 		protected int defaultRequestTimeout = 5000;
+		protected EzyBeanContext beanContext;
 		protected EzyBindingContext bindingContext;
 		protected EzyBindingContextBuilder bindingContextBuilder;
+		protected RpcResponseHandlers responseHandlers;
+		protected RpcResponseHandlers.Builder responseHandlersBuilder;
 		protected Set<String> packagesToScan = new HashSet<>();
 		protected Map<Class, String> commands = new HashMap<>();
 		protected RpcClientType clientType = RpcClientType.SINGLE;
 		protected LinkedList<RpcSocketAddress> serverAddresses = new LinkedList<>();
+		
+		{
+			responseHandlersBuilder = RpcResponseHandlers.builder();
+		}
 	
 		public Builder name(String name) {
 			this.name = name;
@@ -559,6 +579,15 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 			return this;
 		}
 		
+		public Builder onResponseRecevied(String cmd, Consumer<RpcResponse> consumer) {
+			return addResponseHandler(cmd, r -> consumer.accept(r));
+		}
+		
+		public Builder addResponseHandler(String cmd, RpcResponseHandler handler) {
+			this.responseHandlersBuilder.addHandler(cmd, handler);
+			return this;
+		}
+		
 		@Override
 		public QuickRpcClient build() {
 			if(serverAddresses.isEmpty())
@@ -599,6 +628,8 @@ public class QuickRpcClient extends EzyLoggable implements EzyCloseable {
 				}
 				bindingContext = bindingContextBuilder.build();
 			}
+			responseHandlers = responseHandlersBuilder.build();
+			
 			if(serverAddresses.isEmpty())
 				serverAddresses.add(new RpcSocketAddress("127.0.0.1", 3005));
 			return newProduct();

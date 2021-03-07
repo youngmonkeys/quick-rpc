@@ -13,7 +13,7 @@
 	<url>http://maven.apache.org</url>
 	
 	<properties>
-		<ezy.client.version>1.0.3</ezy.client.version>
+		<ezy.client.version>1.0.4</ezy.client.version>
 	</properties>
 
 	<dependencies>
