@@ -3,8 +3,9 @@ package com.tvd12.quick.rpc.client.test.net;
 import org.testng.annotations.Test;
 
 import com.tvd12.quick.rpc.client.net.RpcSocketAddress;
+import com.tvd12.test.base.BaseTest;
 
-public class RpcSocketAddressTest {
+public class RpcSocketAddressTest extends BaseTest {
 
 	@Test
 	public void test() {

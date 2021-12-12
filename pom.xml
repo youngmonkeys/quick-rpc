@@ -5,18 +5,17 @@
 	<parent>
 		<groupId>com.tvd12</groupId>
 		<artifactId>ezyfox</artifactId>
-		<version>0.0.2</version>
+		<version>1.0.2</version>
 	</parent>
 	
 	<artifactId>quick-rpc</artifactId>
-	<version>1.0.1</version>
 	<packaging>pom</packaging>
 
 	<name>quick-rpc</name>
 	<url>http://maven.apache.org</url>
 
 	<properties>
-		<ezy.version>1.1.4</ezy.version>
+		<ezy.version>1.2.1</ezy.version>
 	</properties>
 	
 	<dependencies>

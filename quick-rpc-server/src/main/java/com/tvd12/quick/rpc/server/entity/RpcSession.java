@@ -48,7 +48,7 @@ public class RpcSession {
 		commandData.add(cmd, responseId, responseData);
 		EzyArray response = EzyEntityFactory.newArray();
 		response.add(internalCommand, commandData);
-		transporter.send(response, session);
+		transporter.send(response, session, false);
 	}
 	
 	public Object getKey() {

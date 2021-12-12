@@ -4,8 +4,9 @@ import org.testng.annotations.Test;
 
 import com.tvd12.quick.rpc.client.net.RpcSocketAddress;
 import com.tvd12.quick.rpc.client.net.RpcURI;
+import com.tvd12.test.base.BaseTest;
 
-public class RpcURITest {
+public class RpcURITest extends BaseTest {
 
 	@Test
 	public void fullTest() {
