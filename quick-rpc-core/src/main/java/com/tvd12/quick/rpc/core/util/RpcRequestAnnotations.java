@@ -5,13 +5,13 @@ import com.tvd12.quick.rpc.core.annotation.RpcRequest;
 
 public final class RpcRequestAnnotations {
 
-	private RpcRequestAnnotations() {}
-	
-	public static String getCommand(RpcRequest annotation) {
-		String command = annotation.value();
-		if(EzyStrings.isNoContent(command))
-			command = annotation.command();
-		return command;
-	}
-	
+    private RpcRequestAnnotations() {}
+
+    public static String getCommand(RpcRequest annotation) {
+        String command = annotation.value();
+        if (EzyStrings.isNoContent(command)) {
+            command = annotation.command();
+        }
+        return command;
+    }
 }

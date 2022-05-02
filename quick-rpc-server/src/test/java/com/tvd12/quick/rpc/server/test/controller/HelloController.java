@@ -11,9 +11,13 @@ import com.tvd12.quick.rpc.server.test.data.GreetResponse;
 @RpcController("Big")
 public class HelloController {
 
-	@Rpc("Hello")
-	public GreetResponse greet(GreetRequest request, RpcRequest<?> r, RpcResponse response, RpcSession session) {
-		return new GreetResponse("Hello " + request.getWho() + "!");
-	}
-	
+    @Rpc("Hello")
+    public GreetResponse greet(
+        GreetRequest request,
+        RpcRequest<?> r,
+        RpcResponse response,
+        RpcSession session
+    ) {
+        return new GreetResponse("Hello " + request.getWho() + "!");
+    }
 }

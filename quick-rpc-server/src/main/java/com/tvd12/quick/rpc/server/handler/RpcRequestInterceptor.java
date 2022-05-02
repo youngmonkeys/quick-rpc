@@ -5,11 +5,10 @@ import com.tvd12.quick.rpc.server.entity.RpcResponse;
 
 @SuppressWarnings("rawtypes")
 public interface RpcRequestInterceptor {
-	
-	default void preHandle(RpcRequest request, RpcResponse response) {}
-	
-	default void postHandle(RpcRequest request, RpcResponse response) {}
-	
-	default void postHandle(RpcRequest request, RpcResponse response, Exception e) {}
-	
+
+    default void preHandle(RpcRequest request, RpcResponse response) {}
+
+    default void postHandle(RpcRequest request, RpcResponse response) {}
+
+    default void postHandle(RpcRequest request, RpcResponse response, Exception e) {}
 }

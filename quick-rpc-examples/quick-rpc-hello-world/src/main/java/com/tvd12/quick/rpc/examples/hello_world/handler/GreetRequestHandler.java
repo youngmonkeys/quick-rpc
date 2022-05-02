@@ -10,9 +10,9 @@ import com.tvd12.quick.rpc.server.handler.RpcAbstractRequestHandler;
 @RpcRequestHandled("Greet")
 public class GreetRequestHandler extends RpcAbstractRequestHandler<GreetRequest> {
 
-	@Override
-	public void handle(RpcRequest<GreetRequest> request, RpcResponse response) {
-		response.write(new GreetResponse("Greet " + request.getData().getWho() + "!"));
-	}
+    @Override
+    public void handle(RpcRequest<GreetRequest> request, RpcResponse response) {
+        response.write(new GreetResponse("Greet " + request.getData().getWho() + "!"));
+    }
 
 }

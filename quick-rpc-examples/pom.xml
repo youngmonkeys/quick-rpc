@@ -1,38 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>com.tvd12</groupId>
-		<artifactId>ezyfox</artifactId>
-		<version>1.0.3</version>
-	</parent>
-	
-	<artifactId>quick-rpc-examples</artifactId>
-	<version>1.0.0</version>
-	<packaging>pom</packaging>
+    <parent>
+        <groupId>com.tvd12</groupId>
+        <artifactId>ezyfox</artifactId>
+        <version>1.0.3</version>
+    </parent>
 
-	<name>quick-rpc-examples</name>
-	<url>http://maven.apache.org</url>
-	
-	<properties>
-		<quick.rpc.version>1.0.3</quick.rpc.version>
-	</properties>
-	
-	<dependencies>
-		<dependency>
-			<groupId>com.tvd12</groupId>
-			<artifactId>quick-rpc-server</artifactId>
-			<version>${quick.rpc.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.tvd12</groupId>
-			<artifactId>quick-rpc-client</artifactId>
-			<version>${quick.rpc.version}</version>
-		</dependency>
-	</dependencies>
-	
-	<modules>
-		<module>quick-rpc-hello-world</module>
-	</modules>
+    <artifactId>quick-rpc-examples</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+
+    <name>quick-rpc-examples</name>
+    <url>http://maven.apache.org</url>
+
+    <properties>
+        <quick.rpc.version>1.0.3</quick.rpc.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.tvd12</groupId>
+            <artifactId>quick-rpc-server</artifactId>
+            <version>${quick.rpc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.tvd12</groupId>
+            <artifactId>quick-rpc-client</artifactId>
+            <version>${quick.rpc.version}</version>
+        </dependency>
+    </dependencies>
+
+    <modules>
+        <module>quick-rpc-hello-world</module>
+    </modules>
 </project>

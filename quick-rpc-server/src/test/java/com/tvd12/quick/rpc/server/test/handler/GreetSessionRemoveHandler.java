@@ -8,7 +8,6 @@ import com.tvd12.quick.rpc.server.handler.RpcEventHandler;
 @RpcEventHandled(RpcEventType.SESSION_REMOVED)
 public class GreetSessionRemoveHandler implements RpcEventHandler<RpcSessionRemoveEvent> {
 
-	@Override
-	public void handle(RpcSessionRemoveEvent event) {}
-
+    @Override
+    public void handle(RpcSessionRemoveEvent event) {}
 }

@@ -6,8 +6,8 @@ import com.tvd12.quick.rpc.server.annotation.RpcTryCatch;
 @RpcExceptionHandler
 public class HelloExceptionHandler {
 
-	@RpcTryCatch(IllegalArgumentException.class)
-	public void handleIllegalArgumentException(IllegalArgumentException e) {
-	}
-
+    @RpcTryCatch(IllegalArgumentException.class)
+    public void handleIllegalArgumentException(
+        IllegalArgumentException e
+    ) {}
 }

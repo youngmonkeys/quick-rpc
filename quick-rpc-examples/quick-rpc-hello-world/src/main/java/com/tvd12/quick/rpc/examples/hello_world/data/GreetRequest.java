@@ -12,6 +12,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class GreetRequest {
 
-	protected String who;
-	
+    protected String who;
+
 }

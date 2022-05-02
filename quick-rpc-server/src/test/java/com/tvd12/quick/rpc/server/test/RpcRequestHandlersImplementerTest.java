@@ -6,10 +6,9 @@ import com.tvd12.quick.rpc.server.test.controller.HelloController;
 
 public class RpcRequestHandlersImplementerTest {
 
-	public static void main(String[] args) {
-		RpcRequestHandlerImplementer.setDebug(true);
-		RpcRequestHandlersImplementer implementer = new RpcRequestHandlersImplementer();
-		implementer.implement(new HelloController());
-	}
-	
+    public static void main(String[] args) {
+        RpcRequestHandlerImplementer.setDebug(true);
+        RpcRequestHandlersImplementer implementer = new RpcRequestHandlersImplementer();
+        implementer.implement(new HelloController());
+    }
 }

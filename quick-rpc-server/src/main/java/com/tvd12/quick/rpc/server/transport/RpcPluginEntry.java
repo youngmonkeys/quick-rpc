@@ -7,10 +7,12 @@ import com.tvd12.ezyfoxserver.ext.EzyPluginEntry;
 
 public class RpcPluginEntry implements EzyPluginEntry {
 
-	@Override
-	public void config(EzyPluginContext ctx) {
-		ctx.get(EzyPluginSetup.class)
-			.addEventController(EzyEventType.USER_LOGIN, new RpcAuthenController());
-	}
-
+    @Override
+    public void config(EzyPluginContext ctx) {
+        ctx.get(EzyPluginSetup.class)
+            .addEventController(
+                EzyEventType.USER_LOGIN,
+                new RpcAuthenController()
+            );
+    }
 }

@@ -3,8 +3,8 @@
 <suite name="All-Test">
 
     <test name="All">
-    	<packages>
-    		<package name="com.tvd12.quick.rpc.server.test"/>
-    	</packages>
+        <packages>
+            <package name="com.tvd12.quick.rpc.server.test"/>
+        </packages>
     </test>
 </suite>

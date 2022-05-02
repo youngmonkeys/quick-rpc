@@ -5,9 +5,8 @@ import com.tvd12.ezyfoxserver.ext.EzyPluginEntryLoader;
 
 public class RpcPluginEntryLoader implements EzyPluginEntryLoader {
 
-	@Override
-	public EzyPluginEntry load() throws Exception {
-		return new RpcPluginEntry();
-	}
-	
+    @Override
+    public EzyPluginEntry load() {
+        return new RpcPluginEntry();
+    }
 }

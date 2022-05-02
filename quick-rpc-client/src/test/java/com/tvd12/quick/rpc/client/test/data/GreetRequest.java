@@ -1,7 +1,6 @@
 package com.tvd12.quick.rpc.client.test.data;
 
 import com.tvd12.ezyfox.binding.annotation.EzyObjectBinding;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,6 +11,5 @@ import lombok.Setter;
 @EzyObjectBinding(read = false)
 public class GreetRequest {
 
-	protected String who;
-	
+    protected String who;
 }

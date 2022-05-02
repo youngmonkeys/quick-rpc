@@ -1,7 +1,6 @@
 package com.tvd12.quick.rpc.client.test.data;
 
 import com.tvd12.quick.rpc.core.annotation.RpcResponse;
-
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -14,11 +13,10 @@ import lombok.Setter;
 @AllArgsConstructor
 public class GreetResponse {
 
-	protected String message;
+    protected String message;
 
-	@Override
-	public String toString() {
-		return message;
-	}
-	
+    @Override
+    public String toString() {
+        return message;
+    }
 }

@@ -11,9 +11,9 @@ import com.tvd12.quick.rpc.server.entity.RpcSession;
 @RpcController
 public class HelloController {
 
-	@Rpc("greet")
-	public GreetResponse greet(GreetRequest request, RpcRequest<?> r, RpcResponse response, RpcSession session) {
-		return new GreetResponse("Hello " + request.getWho() + "!");
-	}
-	
+    @Rpc("greet")
+    public GreetResponse greet(GreetRequest request, RpcRequest<?> r, RpcResponse response, RpcSession session) {
+        return new GreetResponse("Hello " + request.getWho() + "!");
+    }
+
 }

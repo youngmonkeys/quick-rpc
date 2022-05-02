@@ -12,6 +12,6 @@ import lombok.Setter;
 @EzyObjectBinding
 public class GreetResponse {
 
-	protected String message;
-	
+    protected String message;
+
 }

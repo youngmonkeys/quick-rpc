@@ -6,15 +6,15 @@ import com.tvd12.quick.rpc.server.setting.QuickRpcSettings;
 
 public class HellWorldRpcServerExample {
 
-	public static void main(String[] args) throws Exception {
-		RpcRequestHandlerImplementer.setDebug(true);
-		QuickRpcSettings settings = QuickRpcSettings.builder()
-				.username("admin")
-				.password("admin")
-				.build();
-		QuickRpcServer server = new QuickRpcServer(settings)
-				.scan("com.tvd12.quick.rpc.examples.hello_world");
-		server.start();
-	}
-	
+    public static void main(String[] args) throws Exception {
+        RpcRequestHandlerImplementer.setDebug(true);
+        QuickRpcSettings settings = QuickRpcSettings.builder()
+            .username("admin")
+            .password("admin")
+            .build();
+        QuickRpcServer server = new QuickRpcServer(settings)
+            .scan("com.tvd12.quick.rpc.examples.hello_world");
+        server.start();
+    }
+
 }
