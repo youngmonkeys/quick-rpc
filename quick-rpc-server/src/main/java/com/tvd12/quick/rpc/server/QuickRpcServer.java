@@ -198,7 +198,7 @@ public class QuickRpcServer
             bindingContext = bindingContextBuilder.build();
         }
         eventHandlersBuilder.addHandlers(
-            EzyMaps.newHashMap(
+            EzyMaps.<RpcEventType, RpcEventHandler>newHashMap(
                 beanContext.getSingletons(RpcEventHandled.class),
                 it -> it.getClass().getAnnotation(RpcEventHandled.class).value()
             )
@@ -208,7 +208,7 @@ public class QuickRpcServer
         RpcRequestHandlersImplementer requestHandlersImplementer = new RpcRequestHandlersImplementer();
         requestHandlersBuilder.addHandlers(requestHandlersImplementer.implement(controllers));
         requestHandlersBuilder.addHandlers(
-            EzyMaps.newHashMap(
+            EzyMaps.<String, RpcRequestHandler>newHashMap(
                 beanContext.getSingletons(RpcRequestHandled.class),
                 it -> RpcRequestHandledAnnotations.getCommand(it.getClass())
             )
