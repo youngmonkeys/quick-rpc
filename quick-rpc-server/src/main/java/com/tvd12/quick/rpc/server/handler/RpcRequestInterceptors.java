@@ -32,14 +32,14 @@ public class RpcRequestInterceptors {
             this.interceptors = new ArrayList<>();
         }
 
-        public Builder addInteceptor(RpcRequestInterceptor interceptor) {
+        public Builder addInterceptor(RpcRequestInterceptor interceptor) {
             this.interceptors.add(interceptor);
             return this;
         }
 
-        public Builder addInteceptors(List<RpcRequestInterceptor> interceptors) {
+        public Builder addInterceptors(List<RpcRequestInterceptor> interceptors) {
             for (RpcRequestInterceptor interceptor : interceptors) {
-                addInteceptor(interceptor);
+                addInterceptor(interceptor);
             }
             return this;
         }

@@ -129,7 +129,7 @@ public class QuickRpcServer
     }
 
     public QuickRpcServer addRequestInterceptor(RpcRequestInterceptor interceptor) {
-        this.requestInterceptorsBuilder.addInteceptor(interceptor);
+        this.requestInterceptorsBuilder.addInterceptor(interceptor);
         return this;
     }
 
@@ -214,7 +214,7 @@ public class QuickRpcServer
             )
         );
 
-        requestInterceptorsBuilder.addInteceptors(beanContext.getSingletons(RpcInterceptor.class));
+        requestInterceptorsBuilder.addInterceptors(beanContext.getSingletons(RpcInterceptor.class));
 
         List<Object> exceptionControllers = beanContext.getSingletons(RpcExceptionHandler.class);
         RpcExceptionHandlersImplementer exceptionHandlersImplementer = new RpcExceptionHandlersImplementer();
