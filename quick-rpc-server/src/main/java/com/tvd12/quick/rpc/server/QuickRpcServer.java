@@ -169,13 +169,14 @@ public class QuickRpcServer
             }
             if (reflection != null) {
                 beanContextBuilder
+                    .scan(packagesToScan)
+                    .addSingleton("sessionManager", sessionManager)
                     .addSingletonClasses((Set) reflection.getAnnotatedClasses(RpcEventHandled.class))
                     .addSingletonClasses((Set) reflection.getAnnotatedClasses(RpcRequestHandled.class))
                     .addSingletonClasses((Set) reflection.getAnnotatedClasses(RpcController.class))
                     .addSingletonClasses((Set) reflection.getAnnotatedClasses(RpcExceptionHandler.class))
                     .addSingletonClasses((Set) reflection.getAnnotatedClasses(RpcInterceptor.class))
-                    .addAllClasses(reflection)
-                    .addSingleton("sessionManager", sessionManager);
+                ;
             }
             beanContext = beanContextBuilder.build();
         }
