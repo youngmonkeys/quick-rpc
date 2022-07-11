@@ -20,7 +20,7 @@ public class RpcRequestHandlerMethod extends RpcHandlerMethod {
         if (EzyStrings.isNoContent(group)) {
             return methodCommand;
         }
-        return group + "/" + methodCommand;
+        return (group + "/" + methodCommand).replace("//", "/");
     }
 
     @Override
