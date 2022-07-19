@@ -11,7 +11,7 @@ import com.tvd12.quick.rpc.server.test.data.GreetResponse;
 @RpcController("Say")
 public class GreetController {
 
-    @Rpc("Gree")
+    @Rpc("Greet")
     public GreetResponse greet(
         GreetRequest request,
         RpcRequest<?> r,
