@@ -106,6 +106,10 @@ public class RpcExceptionHandlerImplementer
                 .append(") {");
             body.append(instructionIf);
             EzyInstruction instructionHandle = new EzyInstruction("\t\t", "\n");
+            if (handlerMethod.getReturnType() != void.class) {
+                instructionHandle.variable(Object.class, "errorData")
+                    .equal();
+            }
             instructionHandle
                 .append("this.exceptionHandler.").append(handlerMethod.getName())
                 .bracketopen();
@@ -113,6 +117,11 @@ public class RpcExceptionHandlerImplementer
             instructionHandle
                 .bracketclose();
             body.append(instructionHandle);
+            if (handlerMethod.getReturnType() != void.class) {
+                body.append(
+                    new EzyInstruction("\t\t", "\n").append("arg1.writeError(errorData)")
+                );
+            }
             body.append(new EzyInstruction("\t", "\n", false).append("}"));
         }
         body.append(new EzyInstruction("\t", "\n", false).append("else {"));

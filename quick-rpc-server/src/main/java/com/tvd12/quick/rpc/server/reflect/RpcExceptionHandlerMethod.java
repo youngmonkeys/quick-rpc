@@ -17,6 +17,11 @@ public class RpcExceptionHandlerMethod extends RpcHandlerMethod {
 
     }
 
+    public static boolean isExceptionHandlerMethod(EzyMethod method) {
+        return method.isAnnotated(EzyTryCatch.class)
+            || method.isAnnotated(RpcTryCatch.class);
+    }
+
     protected Class<?>[] fetchExceptionClasses() {
         EzyTryCatch tryCatchAnnotation = method.getAnnotation(EzyTryCatch.class);
         if (tryCatchAnnotation != null) {

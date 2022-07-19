@@ -1,6 +1,5 @@
 package com.tvd12.quick.rpc.server.reflect;
 
-import com.tvd12.ezyfox.core.annotation.EzyTryCatch;
 import com.tvd12.ezyfox.reflect.EzyClass;
 import com.tvd12.ezyfox.reflect.EzyMethod;
 import com.tvd12.quick.rpc.server.annotation.Rpc;
@@ -47,7 +46,9 @@ public class RpcControllerProxy {
 
     public List<RpcExceptionHandlerMethod> fetchExceptionHandlerMethods() {
         List<RpcExceptionHandlerMethod> list = new ArrayList<>();
-        List<EzyMethod> methods = clazz.getMethods(m -> m.isAnnotated(EzyTryCatch.class));
+        List<EzyMethod> methods = clazz.getMethods(
+            RpcExceptionHandlerMethod::isExceptionHandlerMethod
+        );
         for (EzyMethod method : methods) {
             RpcExceptionHandlerMethod m = new RpcExceptionHandlerMethod(method);
             list.add(m);
