@@ -5,9 +5,9 @@
 	<parent>
 		<groupId>com.tvd12</groupId>
 		<artifactId>ezyfox</artifactId>
-		<version>1.0.5</version>
+		<version>1.0.6</version>
 	</parent>
-	<version>1.0.7</version>
+	<version>1.0.8</version>
 	<artifactId>quick-rpc</artifactId>
 	<packaging>pom</packaging>
 
@@ -15,8 +15,8 @@
 	<url>http://maven.apache.org</url>
 
 	<properties>
-		<ezy.version>1.2.7</ezy.version>
-		<ezy.client.version>1.2.4</ezy.client.version>
+		<ezy.version>1.2.8</ezy.version>
+		<ezy.client.version>1.2.5</ezy.client.version>
 	</properties>
 	
 	<dependencies>
